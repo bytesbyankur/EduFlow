@@ -1,0 +1,5 @@
+PRESENCE_THRESHOLD = 0.7
+CAMERA_INDEX = 0
+SESSION_DURATION = 30  # seconds
+JWT_SECRET = "super-secret-key-change-this"
+JWT_EXPIRY_HOURS = 6
