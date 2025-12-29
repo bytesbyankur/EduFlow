@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFlow | Your Unified Learning Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-[#0a0f2b] z-[100] hidden flex flex-col items-center justify-center">
+        <div class="w-20 h-20 border-t-4 border-l-4 border-purple-500 rounded-full animate-spin mb-8 shadow-[0_0_40px_rgba(168,85,247,0.3)]"></div>
+        <p class="text-purple-300 font-black tracking-[0.5em] text-xs uppercase animate-pulse">Establishing Secure Uplink</p>
+    </div>
+
+    <!-- Welcome Page -->
+    <section id="welcome-page" class="page active flex-col items-center justify-center text-white p-6 relative overflow-hidden">
+        <!-- Gradients -->
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#7c3aed]/10 blur-[140px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#1e1b4b]/40 blur-[140px] rounded-full"></div>
+        
+        <!-- Floating Icons -->
+        <div id="parallax-container" class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-[15%] left-[20%] floating-icon"><i data-lucide="book-open" class="text-purple-300 opacity-40 w-10 h-10"></i></div>
+            <div class="absolute top-[25%] right-[15%] floating-icon" style="animation-delay: 1s;"><i data-lucide="cloud" class="text-lavender-400 opacity-30 w-14 h-14"></i></div>
+            <div class="absolute bottom-[30%] left-[10%] floating-icon" style="animation-delay: 2s;"><i data-lucide="trending-up" class="text-blue-300 opacity-40 w-12 h-12"></i></div>
+            <div class="absolute bottom-[20%] right-[25%] floating-icon" style="animation-delay: 1.5s;"><i data-lucide="sparkles" class="text-purple-200 opacity-50 w-8 h-8"></i></div>
+        </div>
+
+        <div class="z-10 flex flex-col items-center justify-center text-center space-y-10 max-w-4xl">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-purple-500 blur-[90px] opacity-10 group-hover:opacity-30 transition-opacity duration-700"></div>
+                <h1 id="animated-title" class="text-7xl md:text-[10rem] font-black tracking-tighter mb-0 flex cursor-default select-none relative">
+                    <!-- Letters will be injected here via JS -->
+                </h1>
+            </div>
+
+            <div class="space-y-4">
+                <p class="text-2xl md:text-3xl text-purple-200 font-light tracking-wide italic tagline" style="animation-delay: 1.2s;">
+                    Your Unified Learning Hub
+                </p>
+                <p class="text-lg md:text-xl text-slate-400 font-medium tracking-normal tagline" style="animation-delay: 1.4s;">
+                    Making your university life <span class="text-[#d8b4fe] font-bold">easier than ever.</span>
+                </p>
+            </div>
+            
+            <div class="pt-8 tagline" style="animation-delay: 1.6s;">
+                <button onclick="navigateTo('login')" class="glass-btn px-12 py-5 rounded-2xl flex items-center space-x-4 group">
+                    <span class="text-lg font-bold tracking-[0.2em] uppercase text-purple-50">Enter Experience</span>
+                    <div class="w-10 h-10 rounded-full bg-[#7c3aed] flex items-center justify-center group-hover:bg-[#a855f7] transition-colors shadow-lg">
+                        <i data-lucide="chevron-right" class="w-6 h-6 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 flex space-x-8 text-[10px] uppercase tracking-[0.3em] text-slate-500 font-bold tagline" style="animation-delay: 2s;">
+            <span>Cloud Infrastructure</span>
+            <span class="text-slate-700">•</span>
+            <span>Attendance Intelligence</span>
+            <span class="text-slate-700">•</span>
+            <span>Academic Tracking</span>
+        </div>
+    </section>
+
+    <!-- Login Page -->
+    <section id="login-page" class="page flex-col items-center justify-center p-6 relative">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+        
+        <button onclick="navigateTo('welcome')" class="absolute top-8 left-8 flex items-center text-slate-400 font-semibold hover:text-purple-300 transition-colors z-20">
+            <i data-lucide="arrow-left" class="mr-2 w-5 h-5"></i> Back to Home
+        </button>
+
+        <div class="w-full max-w-md bg-white rounded-[40px] shadow-2xl overflow-hidden p-10 z-10 border border-slate-100">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-purple-50 text-purple-600 rounded-[24px] flex items-center justify-center mx-auto mb-6 shadow-sm border border-purple-100/50">
+                    <i data-lucide="graduation-cap" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Portal Login</h2>
+                <p class="text-slate-500 text-sm mt-2">Secure access to your academic ecosystem</p>
+            </div>
+
+            <!-- Role Toggle -->
+            <div class="flex bg-slate-100/80 p-1.5 rounded-2xl mb-10 border border-slate-200">
+                <button id="toggle-teacher" onclick="setRole('teacher')" class="flex-1 py-3 text-xs font-black tracking-widest uppercase rounded-xl transition-all bg-white text-indigo-700 shadow-md">
+                    Faculty
+                </button>
+                <button id="toggle-student" onclick="setRole('student')" class="flex-1 py-3 text-xs font-black tracking-widest uppercase rounded-xl transition-all text-slate-400">
+                    Student
+                </button>
+            </div>
+
+            <form onsubmit="handleAuth(event)" class="space-y-6">
+                <div class="space-y-5">
+                    <div>
+                        <label id="user-label" class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">
+                            University ID / Email
+                        </label>
+                        <div class="relative group">
+                            <i id="user-icon" data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors w-5 h-5"></i>
+                            <input id="user-input" type="text" required class="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:bg-white outline-none transition-all focus:ring-indigo-100 focus:border-indigo-600" placeholder="e.g. faculty.miller@edu.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Access Password</label>
+                        <div class="relative group">
+                            <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-600 transition-colors w-5 h-5"></i>
+                            <input type="password" required class="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:bg-white outline-none transition-all focus:ring-purple-100 focus:border-purple-600" placeholder="••••••••••••">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs pt-2">
+                    <label class="flex items-center text-slate-500 cursor-pointer font-bold">
+                        <input type="checkbox" class="mr-2 rounded-lg border-slate-300 text-purple-600 focus:ring-purple-600 h-4 w-4">
+                        Stay signed in
+                    </label>
+                    <a href="#" class="font-black tracking-tight hover:underline text-indigo-600" id="forgot-link">Recovery Account</a>
+                </div>
+
+                <button id="login-btn" type="submit" class="w-full py-5 rounded-[20px] text-sm font-black text-white tracking-[0.2em] uppercase transition-all shadow-xl active:scale-[0.98] bg-gradient-to-r from-indigo-700 to-blue-800 hover:shadow-indigo-200">
+                    Authorize Entry
+                </button>
+            </form>
+
+            <div class="mt-12 flex items-center justify-center space-x-4 opacity-40">
+                <div class="h-[1px] w-8 bg-slate-300"></div>
+                <span class="text-[10px] font-black text-slate-400 tracking-[0.3em]">SECURE NAVY CLOUD</span>
+                <div class="h-[1px] w-8 bg-slate-300"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Teacher Dashboard -->
+    <section id="teacher-dash" class="page bg-[#f8fafc] flex-row">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-[#0f172a] text-slate-400 p-6 hidden lg:flex flex-col border-r border-slate-800">
+            <div class="text-2xl font-black text-white mb-10 tracking-tighter flex items-center">
+                <div class="w-8 h-8 bg-purple-600 rounded-lg mr-2 flex items-center justify-center">
+                    <i data-lucide="cloud" class="w-4 h-4 text-white"></i>
+                </div>
+                EduFlow
+            </div>
+            <nav class="flex-1 space-y-2">
+                <button class="flex items-center w-full p-3 bg-purple-600/10 text-purple-400 rounded-xl font-bold border border-purple-600/20">
+                    <i data-lucide="trending-up" class="mr-3 w-5 h-5"></i> Dashboard
+                </button>
+                <button class="flex items-center w-full p-3 hover:bg-white/5 hover:text-white rounded-xl transition-colors">
+                    <i data-lucide="users" class="mr-3 w-5 h-5"></i> Students
+                </button>
+                <button class="flex items-center w-full p-3 hover:bg-white/5 hover:text-white rounded-xl transition-colors">
+                    <i data-lucide="calendar" class="mr-3 w-5 h-5"></i> Attendance
+                </button>
+            </nav>
+            <button onclick="navigateTo('welcome')" class="flex items-center p-3 hover:text-white transition-colors mt-auto pt-8 border-t border-slate-800">
+                <i data-lucide="log-out" class="mr-3 w-5 h-5"></i> Logout
+            </button>
+        </aside>
+        
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">Faculty Dashboard</h1>
+                    <p class="text-slate-500 font-medium">Academic term Fall 2025 • Prof. Miller</p>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <button class="p-3 bg-white rounded-2xl shadow-sm border border-slate-100"><i data-lucide="bell" class="w-5 h-5"></i></button>
+                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl border-2 border-indigo-200 flex items-center justify-center text-indigo-700 font-black">TM</div>
+                </div>
+            </header>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                <div class="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100">
+                    <h3 class="text-slate-500 text-xs font-black uppercase tracking-widest mb-2">Enrolled Students</h3>
+                    <p class="text-3xl font-black text-slate-900">142</p>
+                </div>
+                <div class="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100">
+                    <h3 class="text-slate-500 text-xs font-black uppercase tracking-widest mb-2">Avg. Attendance</h3>
+                    <p class="text-3xl font-black text-slate-900">94.2%</p>
+                </div>
+                <div class="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100">
+                    <h3 class="text-slate-500 text-xs font-black uppercase tracking-widest mb-2">Cloud Assets</h3>
+                    <p class="text-3xl font-black text-slate-900">12.8 GB</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-8 border-b border-slate-100">
+                    <h3 class="text-lg font-black text-slate-900 tracking-tight">Active Student Tracking</h3>
+                </div>
+                <table class="w-full text-left">
+                    <tr class="bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                        <th class="px-8 py-4">Reg ID</th>
+                        <th class="px-8 py-4">Name</th>
+                        <th class="px-8 py-4">Presence</th>
+                    </tr>
+                    <tr><td class="px-8 py-4 text-sm font-bold">S101</td><td class="px-8 py-4 font-black">Alice Johnson</td><td class="px-8 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[10px] font-black">95%</span></td></tr>
+                    <tr><td class="px-8 py-4 text-sm font-bold">S102</td><td class="px-8 py-4 font-black">Bob Smith</td><td class="px-8 py-4"><span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-[10px] font-black">82%</span></td></tr>
+                </table>
+            </div>
+        </main>
+    </section>
+
+    <!-- Student Dashboard -->
+    <section id="student-dash" class="page bg-[#f8fafc] flex-col">
+        <nav class="bg-[#0f172a] text-white px-8 py-5 flex justify-between items-center shadow-xl">
+            <div class="flex items-center space-x-12">
+                <span class="text-2xl font-black tracking-tighter flex items-center">
+                    <div class="w-8 h-8 bg-purple-600 rounded-lg mr-2 flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    EduFlow
+                </span>
+            </div>
+            <button onclick="navigateTo('welcome')" class="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                <i data-lucide="log-out" class="w-5 h-5 text-slate-400"></i>
+            </button>
+        </nav>
+        <main class="max-w-7xl mx-auto p-8 lg:p-12 w-full">
+            <section class="bg-white p-10 rounded-[40px] shadow-sm border border-slate-100 mb-10">
+                <h2 class="text-2xl font-black text-slate-900 mb-8 tracking-tight">Student Metrics</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="p-6 bg-purple-50 rounded-3xl text-center"><p class="text-[10px] text-purple-500 font-black mb-2 uppercase">Attendance</p><p class="text-3xl font-black">95%</p></div>
+                    <div class="p-6 bg-indigo-50 rounded-3xl text-center"><p class="text-[10px] text-indigo-500 font-black mb-2 uppercase">GPA</p><p class="text-3xl font-black">3.85</p></div>
+                    <div class="p-6 bg-slate-50 rounded-3xl text-center"><p class="text-[10px] text-slate-500 font-black mb-2 uppercase">Credits</p><p class="text-3xl font-black">18</p></div>
+                    <div class="p-6 bg-blue-50 rounded-3xl text-center"><p class="text-[10px] text-blue-500 font-black mb-2 uppercase">Rank</p><p class="text-3xl font-black">#4</p></div>
+                </div>
+            </section>
+        </main>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
