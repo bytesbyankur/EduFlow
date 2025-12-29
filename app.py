@@ -5,6 +5,9 @@ from utils.face_utils import get_embedding, match_face
 from utils.spoofing import blink_detect
 from config import PRESENCE_THRESHOLD, CAMERA_INDEX
 from flask_cors import CORS
+import jwt
+from functools import wraps
+from config import JWT_SECRET
 
 app = Flask(__name__)
 CORS(app)
@@ -15,6 +18,33 @@ CORS(app)
 #   "students": { student_id: [timestamps] }
 # }
 session_data = {}
+
+def generate_token(payload):
+    payload["exp"] = datetime.datetime.utcnow() + datetime.timedelta(hours=6)
+    return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+
+def verify_token(token):
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+    except:
+        return None
+
+def auth_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return jsonify({"error": "Token missing"}), 401
+
+        token = auth.replace("Bearer ", "")
+        data = verify_token(token)
+        if not data:
+            return jsonify({"error": "Invalid token"}), 401
+
+        request.user = data
+        return f(*args, **kwargs)
+    return wrapper
+
 
 # ---------------- LOGIN ----------------
 @app.route("/login", methods=["POST"])
@@ -29,16 +59,19 @@ def login():
     )
     row = cur.fetchone()
 
-    if row and row[1] == data["password"]:
-        return jsonify({"teacher_id": row[0]})
+    if not row or row[1] != data["password"]:
+        return jsonify({"error": "Invalid credentials"}), 401
 
-    return jsonify({"error": "Invalid credentials"}), 401
+    token = generate_token({"teacher_id": row[0]})
+    return jsonify({"token": token})
+
 
 
 # ---------------- START SESSION ----------------
 @app.route("/start_session", methods=["POST"])
+@auth_required
 def start_session():
-    teacher_id = request.json["teacher_id"]
+    teacher_id = request.user["teacher_id"]
 
     db = get_db()
     cur = db.cursor()
@@ -50,26 +83,40 @@ def start_session():
         WHERE s.teacher_id = %s
     """, (teacher_id,))
 
-    row = cur.fetchone()
-    if not row:
+    rows = cur.fetchall()
+
+    if not rows:
         return jsonify({"error": "No class found for teacher"}), 400
 
-    class_id, subject_id = row
+    return jsonify({
+        "classes": [
+            {
+                "class_id": r[0],
+                "subject_id": r[1]
+            } for r in rows
+        ]
+    })
+
+#-----------------START CASS SESSIOIN ----------------
+@app.route("/start_class_session", methods=["POST"])
+@auth_required
+def start_class_session():
+    data = request.json
+    class_id = data["class_id"]
+    subject_id = data["subject_id"]
 
     session_data[class_id] = {
-        "teacher_id": teacher_id,
+        "teacher_id": request.user["teacher_id"],
         "subject_id": subject_id,
-        "students": {}
+        "students": {},
+        "started_at": datetime.datetime.utcnow()
     }
 
-    return jsonify({
-        "class_id": class_id,
-        "subject_id": subject_id,
-        "status": "session started"
-    })
+    return jsonify({"status": "session started"})
 
 # ---------------- FACE DETECTION ----------------
 @app.route("/detect_faces", methods=["POST"])
+@auth_required
 def detect_faces():
     class_id = request.json["class_id"]
 
@@ -117,6 +164,7 @@ def detect_faces():
 
 # ---------------- END SESSION ----------------
 @app.route("/end_session", methods=["POST"])
+@auth_required
 def end_session():
     class_id = request.json["class_id"]
 
@@ -160,6 +208,7 @@ def end_session():
 
 # ---------------- REPORT ----------------
 @app.route("/attendance_report", methods=["GET"])
+@auth_required
 def attendance_report():
     db = get_db()
     cur = db.cursor()
