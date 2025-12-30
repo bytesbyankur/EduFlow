@@ -103,6 +103,35 @@ LOCK TABLES `classes` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `student_auth`
+--
+
+DROP TABLE IF EXISTS `student_auth`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_auth` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int DEFAULT NULL,
+  `email` varchar(150) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `student_id` (`student_id`),
+  CONSTRAINT `student_auth_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `student_auth`
+--
+
+LOCK TABLES `student_auth` WRITE;
+/*!40000 ALTER TABLE `student_auth` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_auth` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `students`
 --
 
@@ -154,6 +183,35 @@ CREATE TABLE `subjects` (
 LOCK TABLES `subjects` WRITE;
 /*!40000 ALTER TABLE `subjects` DISABLE KEYS */;
 /*!40000 ALTER TABLE `subjects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `teacher_auth`
+--
+
+DROP TABLE IF EXISTS `teacher_auth`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `teacher_auth` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `teacher_id` int DEFAULT NULL,
+  `email` varchar(150) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `teacher_id` (`teacher_id`),
+  CONSTRAINT `teacher_auth_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teachers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `teacher_auth`
+--
+
+LOCK TABLES `teacher_auth` WRITE;
+/*!40000 ALTER TABLE `teacher_auth` DISABLE KEYS */;
+/*!40000 ALTER TABLE `teacher_auth` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -218,4 +276,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-30 15:33:08
+-- Dump completed on 2025-12-30 17:42:04
