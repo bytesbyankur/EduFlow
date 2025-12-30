@@ -75,15 +75,21 @@
 
         // Auth Logic
         function handleAuth(e) {
-            e.preventDefault();
-            const loader = document.getElementById('loading-screen');
-            loader.style.display = 'flex';
-            
-            setTimeout(() => {
-                loader.style.display = 'none';
-                navigateTo(currentRole === 'teacher' ? 'teacher-dash' : 'student-dash');
-            }, 1500);
+    e.preventDefault();
+    const loader = document.getElementById('loading-screen');
+    loader.style.display = 'flex';
+    
+    setTimeout(() => {
+        loader.style.display = 'none';
+
+        // Check the role and point to the correct relative path
+        if (currentRole === 'teacher') {
+            window.location.href = '../Teacher Portal/index.html'; 
+        } else {
+            window.location.href = '../Student Portal/index.html';
         }
+    }, 1500);
+}
 
         // Init
         window.onload = () => {
