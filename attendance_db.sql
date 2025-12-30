@@ -115,6 +115,9 @@ CREATE TABLE `student_auth` (
   `email` varchar(150) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_verified` tinyint(1) DEFAULT '0',
+  `otp_code` varchar(6) DEFAULT NULL,
+  `otp_expires_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `student_id` (`student_id`),
@@ -198,6 +201,9 @@ CREATE TABLE `teacher_auth` (
   `email` varchar(150) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_verified` tinyint(1) DEFAULT '0',
+  `otp_code` varchar(6) DEFAULT NULL,
+  `otp_expires_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `teacher_id` (`teacher_id`),
@@ -276,4 +282,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-30 17:42:04
+-- Dump completed on 2025-12-30 20:38:09
