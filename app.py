@@ -47,23 +47,51 @@ def auth_required(f):
 
 
 # ---------------- LOGIN ----------------
-@app.route("/login", methods=["POST"])
-def login():
-    data = request.json
+@app.route("/login_face", methods=["POST"])
+def login_face():
     db = get_db()
     cur = db.cursor()
 
-    cur.execute(
-        "SELECT id, password FROM teachers WHERE username=%s",
-        (data["username"],)
-    )
-    row = cur.fetchone()
+    # Capture one frame from camera
+    cap = cv2.VideoCapture(CAMERA_INDEX)
+    ret, frame = cap.read()
+    cap.release()
 
-    if not row or row[1] != data["password"]:
-        return jsonify({"error": "Invalid credentials"}), 401
+    if not ret:
+        return jsonify({"error": "Camera not accessible"}), 500
 
-    token = generate_token({"teacher_id": row[0]})
-    return jsonify({"token": token})
+    frame = cv2.flip(frame, 1)
+
+    # Anti-spoofing (blink)
+    if not blink_detect(frame):
+        return jsonify({"error": "Blink not detected"}), 403
+
+    # Generate embedding
+    embedding = get_embedding(frame)
+
+    # Load teacher embeddings
+    cur.execute("SELECT id, face_embedding FROM teachers")
+    teachers = cur.fetchall()
+
+    teacher_embeddings = {
+        row[0]: np.frombuffer(row[1], dtype=np.float64)
+        for row in teachers
+    }
+
+    # Match face
+    teacher_id = match_face(embedding, teacher_embeddings)
+
+    if not teacher_id:
+        return jsonify({"error": "Teacher not recognized"}), 401
+
+    # Generate JWT
+    token = generate_token({"teacher_id": teacher_id})
+
+    return jsonify({
+        "teacher_id": teacher_id,
+        "token": token
+    })
+
 
 
 
@@ -126,14 +154,18 @@ def detect_faces():
     db = get_db()
     cur = db.cursor()
 
-    # ✅ Load ONLY students of this class
+    # Load ONLY students of this class
     cur.execute("""
         SELECT id, face_embedding
         FROM students
         WHERE class_id = %s
     """, (class_id,))
 
-    students = {row[0]: row[1] for row in cur.fetchall()}
+    students = {
+    row[0]: np.frombuffer(row[1], dtype=np.float64)
+    for row in cur.fetchall()
+}
+
 
     cap = cv2.VideoCapture(CAMERA_INDEX)
     start_time = datetime.datetime.now()
