@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFlow | Student Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen flex overflow-hidden">
+
+    <!-- --- SIDEBAR (Navy Blue) --- -->
+    <aside class="w-72 bg-[#0f172a] text-slate-400 p-8 hidden lg:flex flex-col border-r border-slate-800 shrink-0">
+        <div class="flex items-center space-x-3 mb-12">
+            <div class="w-10 h-10 bg-[#7c3aed] rounded-xl flex items-center justify-center shadow-lg shadow-purple-900/40">
+                <i data-lucide="cloud" class="text-white w-6 h-6"></i>
+            </div>
+            <span class="text-2xl font-black text-white tracking-tighter">EduFlow</span>
+        </div>
+
+        <nav class="flex-1 space-y-3">
+            <button onclick="switchTab('overview')" id="nav-overview" class="sidebar-item active flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em]">
+                <i data-lucide="trending-up" class="mr-4 w-5 h-5"></i> Overview
+            </button>
+            <button onclick="switchTab('attendance')" id="nav-attendance" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
+                <i data-lucide="calendar" class="mr-4 w-5 h-5"></i> Attendance
+            </button>
+            <button onclick="switchTab('courses')" id="nav-courses" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
+                <i data-lucide="book-open" class="mr-4 w-5 h-5"></i> Courses
+            </button>
+            <button onclick="switchTab('notes')" id="nav-notes" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
+                <i data-lucide="file-text" class="mr-4 w-5 h-5"></i> Note Cloud
+            </button>
+        </nav>
+
+        <div class="mt-auto pt-8 border-t border-slate-800">
+            <div class="bg-gradient-to-br from-[#1e1b4b] to-[#0f172a] p-4 rounded-2xl border border-white/5 mb-6">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-purple-400 mb-2">Cloud Usage</p>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full mb-2">
+                    <div class="bg-purple-500 h-1.5 rounded-full" style="width: 45%;"></div>
+                </div>
+                <p class="text-[10px] text-slate-500">2.1 GB of 5 GB used</p>
+            </div>
+            <button class="flex items-center w-full p-3 hover:text-white transition-colors">
+                <i data-lucide="user" class="mr-3 w-5 h-5"></i> Profile Settings
+            </button>
+        </div>
+    </aside>
+
+    <!-- --- MAIN CONTENT --- -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 custom-scrollbar">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div>
+                <h1 class="text-4xl font-black tracking-tight text-[#0f172a]">Hello, Alice!</h1>
+                <p class="text-slate-500 font-medium mt-1">Here is what's happening in your <span class="text-[#7c3aed]">Semester 4</span>.</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative hidden sm:block">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                    <input type="text" placeholder="Search notes..." class="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm w-64 focus:ring-4 focus:ring-purple-100 outline-none transition-all shadow-sm">
+                </div>
+                <button class="p-3 bg-white rounded-2xl shadow-sm border border-slate-200 text-slate-400 hover:text-[#7c3aed] transition-colors"><i data-lucide="bell" class="w-5.5 h-5.5"></i></button>
+                <div class="w-12 h-12 bg-[#d8b4fe] rounded-2xl border-2 border-white flex items-center justify-center text-[#7c3aed] font-black shadow-sm">AJ</div>
+            </div>
+        </header>
+
+        <!-- --- Tab: Overview (Default) --- -->
+        <div id="tab-content-overview" class="animate-fade-in grid grid-cols-1 xl:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Metrics & Courses -->
+            <div class="xl:col-span-2 space-y-8">
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Stat Card 1 -->
+                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="p-4 rounded-[20px] bg-purple-50 text-purple-600 border border-purple-100 transition-transform group-hover:scale-110">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-green-500">+2.4%</span>
+                        </div>
+                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Overall Attendance</h3>
+                        <p class="text-3xl font-black text-slate-900 mt-2">94.2%</p>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="p-4 rounded-[20px] bg-indigo-50 text-indigo-600 border border-indigo-100 transition-transform group-hover:scale-110">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Stable</span>
+                        </div>
+                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Current GPA</h3>
+                        <p class="text-3xl font-black text-slate-900 mt-2">3.85</p>
+                    </div>
+                    <!-- Stat Card 3 -->
+                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="p-4 rounded-[20px] bg-blue-50 text-blue-600 border border-blue-100 transition-transform group-hover:scale-110">
+                                <i data-lucide="book-open" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">53%</span>
+                        </div>
+                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Credits Earned</h3>
+                        <p class="text-3xl font-black text-slate-900 mt-2">64 / 120</p>
+                    </div>
+                </div>
+
+                <!-- Academic Progress -->
+                <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-xl font-black tracking-tight">Academic Progress</h3>
+                        <button class="text-xs font-black text-[#7c3aed] uppercase tracking-widest bg-purple-50 px-4 py-2 rounded-xl">Detailed View</button>
+                    </div>
+                    <div class="space-y-6">
+                        <!-- Course Row 1 -->
+                        <div class="group flex flex-col md:flex-row md:items-center justify-between p-4 rounded-3xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-[#7c3aed] group-hover:text-white transition-all">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-black text-slate-800">Quantum Physics</h4>
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">On Track</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-12">
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400 font-black uppercase tracking-widest">Attendance</p>
+                                    <p class="text-lg font-black text-[#0f172a]">95%</p>
+                                </div>
+                                <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden hidden md:block">
+                                    <div class="bg-[#7c3aed] h-full" style="width: 95%;"></div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400 font-black uppercase tracking-widest">Grade</p>
+                                    <p class="text-lg font-black text-purple-600">A</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Course Row 2 -->
+                        <div class="group flex flex-col md:flex-row md:items-center justify-between p-4 rounded-3xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-[#7c3aed] group-hover:text-white transition-all">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-black text-slate-800">Artificial Intelligence</h4>
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Improving</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-12">
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400 font-black uppercase tracking-widest">Attendance</p>
+                                    <p class="text-lg font-black text-[#0f172a]">92%</p>
+                                </div>
+                                <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden hidden md:block">
+                                    <div class="bg-[#7c3aed] h-full" style="width: 92%;"></div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-400 font-black uppercase tracking-widest">Grade</p>
+                                    <p class="text-lg font-black text-purple-600">A-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Note Cloud Quick Access -->
+                <section class="bg-[#0f172a] p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl rounded-full"></div>
+                    <div class="flex justify-between items-center mb-8 relative z-10">
+                        <h3 class="text-lg font-black tracking-[0.1em] uppercase text-purple-300">Note Cloud</h3>
+                        <button class="p-2 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="space-y-4 relative z-10">
+                        <!-- Note 1 -->
+                        <div class="flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group">
+                            <div class="p-3 bg-purple-500/20 text-purple-300 rounded-xl mr-4 group-hover:bg-purple-500 group-hover:text-white transition-all">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold truncate pr-4">Neural Networks - L12</h4>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Oct 24, 2025</p>
+                            </div>
+                            <button class="text-slate-500 hover:text-white"><i data-lucide="download" class="w-4 h-4"></i></button>
+                        </div>
+                        <!-- Note 2 -->
+                        <div class="flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group">
+                            <div class="p-3 bg-purple-500/20 text-purple-300 rounded-xl mr-4 group-hover:bg-purple-500 group-hover:text-white transition-all">
+                                <i data-lucide="file-text" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold truncate pr-4">Relativity Theory Basics</h4>
+                                <p class="text-[10px] text-slate-500 uppercase tracking-widest mt-0.5">Oct 22, 2025</p>
+                            </div>
+                            <button class="text-slate-500 hover:text-white"><i data-lucide="download" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <button class="w-full mt-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white/10 transition-all">Open Full Vault</button>
+                </section>
+
+                <!-- Attendance Log Card -->
+                <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-black text-slate-900 mb-6">Attendance Log</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 rounded-full bg-green-500 mr-3"></div>
+                                <span class="text-sm font-bold text-slate-600">Present Days</span>
+                            </div>
+                            <span class="text-sm font-black">104</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-2 h-2 rounded-full bg-red-500 mr-3"></div>
+                                <span class="text-sm font-bold text-slate-600">Absences</span>
+                            </div>
+                            <span class="text-sm font-black">6</span>
+                        </div>
+                    </div>
+                    <div class="mt-8 pt-8 border-t border-slate-50 text-center">
+                        <p class="text-xs text-slate-400 font-medium">Registration for next semester in <span class="text-purple-600 font-black">12 Days</span></p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Placeholder for other tabs (hidden by default) -->
+        <div id="tab-content-attendance" class="page-content hidden animate-fade-in text-center py-20">
+            <h2 class="text-2xl font-black text-slate-400 uppercase tracking-widest">Attendance Details Coming Soon</h2>
+            <p class="text-slate-400 mt-2">Comprehensive class logs and heatmap visualization.</p>
+        </div>
+        <div id="tab-content-courses" class="page-content hidden animate-fade-in text-center py-20">
+            <h2 class="text-2xl font-black text-slate-400 uppercase tracking-widest">Course Catalog Coming Soon</h2>
+            <p class="text-slate-400 mt-2">Manage your active enrollments and elective selections.</p>
+        </div>
+        <div id="tab-content-notes" class="page-content hidden animate-fade-in text-center py-20">
+            <h2 class="text-2xl font-black text-slate-400 uppercase tracking-widest">Full Note Cloud Vault</h2>
+            <p class="text-slate-400 mt-2">Access all shared lectures and academic documents.</p>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
