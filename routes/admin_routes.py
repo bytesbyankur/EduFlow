@@ -3,8 +3,51 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from db import get_db
 from utils.auth import generate_token, verify_token
+import cv2
+import numpy as np
+import time
+from utils.face_utils import get_embedding
+from utils.spoofing import blink_detect
+from config import CAMERA_INDEX    
 
 admin_bp = Blueprint("admin", __name__)
+
+def capture_face_embedding():
+    cap = cv2.VideoCapture(CAMERA_INDEX)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+    embeddings = []
+    blink_detected = False
+    start_time = time.time()
+
+    while time.time() - start_time < 10:  # 10 seconds window
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        frame = cv2.flip(frame, 1)
+
+        if blink_detect(frame):
+            blink_detected = True
+
+        emb = get_embedding(frame)
+        if emb is not None:
+            embeddings.append(emb)
+
+        if len(embeddings) >= 5 and blink_detected:
+            break
+
+    cap.release()
+
+    if not blink_detected:
+        return None, "Blink not detected"
+
+    if len(embeddings) < 5:
+        return None, "Insufficient face samples"
+
+    avg_embedding = np.mean(embeddings, axis=0)
+    return avg_embedding, None
+
 
 #---------------- ADMIN-ONLY DECORATOR ----------------
 def admin_required(f):
@@ -242,3 +285,65 @@ def assign_subject_class():
     return jsonify({"status": "Subject assigned to class"}), 200
 
 
+#---------------- SET TEACHER FACE EMBEDDING ----------------
+@admin_bp.route("/enroll_teacher_face", methods=["POST"])
+@admin_required
+def enroll_teacher_face():
+    data = request.json
+    if not data or "teacher_id" not in data:
+        return jsonify({"error": "teacher_id required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM teachers WHERE id = %s", (data["teacher_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid teacher_id"}), 400
+
+    embedding, error = capture_face_embedding()
+    if error:
+        return jsonify({"error": error}), 400
+
+    cur.execute("""
+        UPDATE teachers
+        SET face_embedding = %s
+        WHERE id = %s
+    """, (embedding.tobytes(), data["teacher_id"]))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Teacher face enrolled successfully"}), 200
+
+
+#---------------- SET STUDENT FACE EMBEDDING ----------------
+@admin_bp.route("/enroll_student_face", methods=["POST"])
+@admin_required
+def enroll_student_face():
+    data = request.json
+    if not data or "student_id" not in data:
+        return jsonify({"error": "student_id required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM students WHERE id = %s", (data["student_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid student_id"}), 400
+
+    embedding, error = capture_face_embedding()
+    if error:
+        return jsonify({"error": error}), 400
+
+    cur.execute("""
+        UPDATE students
+        SET face_embedding = %s
+        WHERE id = %s
+    """, (embedding.tobytes(), data["student_id"]))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Student face enrolled successfully"}), 200
