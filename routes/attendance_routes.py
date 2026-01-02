@@ -12,14 +12,15 @@ from routes.session_routes import session_data
 
 attendance_bp = Blueprint("attendance", __name__)
 
+# ================= AUTH DECORATOR =================
 def auth_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         auth = request.headers.get("Authorization")
-        if not auth:
+        if not auth or not auth.startswith("Bearer "):
             return jsonify({"error": "Token missing"}), 401
 
-        token = auth.replace("Bearer ", "")
+        token = auth.split(" ", 1)[1]
         data = verify_token(token)
         if not data:
             return jsonify({"error": "Invalid token"}), 401
@@ -29,9 +30,13 @@ def auth_required(f):
     return wrapper
 
 
+# ================= FACE DETECTION =================
 @attendance_bp.route("/detect_faces", methods=["POST"])
 @auth_required
 def detect_faces():
+    if "teacher_id" not in request.user:
+        return jsonify({"error": "Teacher access required"}), 403
+
     data = request.json
     if not data or "class_id" not in data:
         return jsonify({"error": "class_id required"}), 400
@@ -50,7 +55,7 @@ def detect_faces():
     cur.execute("""
         SELECT id, face_embedding
         FROM students
-        WHERE class_id = %s
+        WHERE class_id = %s AND face_embedding IS NOT NULL
     """, (class_id,))
 
     students = {
@@ -61,31 +66,40 @@ def detect_faces():
     cap = cv2.VideoCapture(CAMERA_INDEX)
     start_time = datetime.datetime.now()
 
-    while (datetime.datetime.now() - start_time).seconds < ATTENDANCE_SCAN_WINDOW:
-        ret, frame = cap.read()
-        if not ret:
-            continue
+    try:
+        while (datetime.datetime.now() - start_time).seconds < ATTENDANCE_SCAN_WINDOW:
+            ret, frame = cap.read()
+            if not ret:
+                continue
 
-        frame = cv2.flip(frame, 1)
+            frame = cv2.flip(frame, 1)
 
-        if not blink_detect(frame):
-            continue
+            if not blink_detect(frame):
+                continue
 
-        emb = get_embedding(frame)
-        student_id = match_face(emb, students)
+            emb = get_embedding(frame)
+            student_id = match_face(emb, students)
 
-        if student_id:
-            session_data[class_id]["students"].setdefault(
-                student_id, []
-            ).append(datetime.datetime.now())
+            if student_id:
+                session_data[class_id]["students"].setdefault(
+                    student_id, set()
+                ).add(datetime.datetime.now().second)
 
-    cap.release()
-    return jsonify({"status": "detection complete"})
+    finally:
+        cap.release()
+        cur.close()
+        db.close()
+
+    return jsonify({"status": "detection complete"}), 200
 
 
+# ================= END SESSION =================
 @attendance_bp.route("/end_session", methods=["POST"])
 @auth_required
 def end_session():
+    if "teacher_id" not in request.user:
+        return jsonify({"error": "Teacher access required"}), 403
+
     data = request.json
     if not data or "class_id" not in data:
         return jsonify({"error": "class_id required"}), 400
@@ -105,8 +119,8 @@ def end_session():
     db = get_db()
     cur = db.cursor()
 
-    for student_id, timestamps in session_data[class_id]["students"].items():
-        presence_score = len(timestamps) / ATTENDANCE_SCAN_WINDOW
+    for student_id, seconds_present in session_data[class_id]["students"].items():
+        presence_score = min(len(seconds_present) / 30, 1.0)
 
         if presence_score >= PRESENCE_THRESHOLD:
             status = "PRESENT"
@@ -120,8 +134,8 @@ def end_session():
             (student_id, subject_id, teacher_id, date, status, presence_score)
             VALUES (%s, %s, %s, %s, %s, %s)
             ON DUPLICATE KEY UPDATE
-            status=VALUES(status),
-            presence_score=VALUES(presence_score)
+            status = VALUES(status),
+            presence_score = VALUES(presence_score)
         """, (
             student_id, subject_id, teacher_id,
             today, status, presence_score
@@ -130,20 +144,41 @@ def end_session():
     db.commit()
     session_data.pop(class_id, None)
 
-    return jsonify({"status": "attendance marked"})
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "attendance marked"}), 200
 
 
+# ================= ATTENDANCE REPORT =================
 @attendance_bp.route("/attendance_report", methods=["GET"])
 @auth_required
 def attendance_report():
     db = get_db()
-    cur = db.cursor()
+    cur = db.cursor(dictionary=True)
 
-    cur.execute("""
-        SELECT s.name, sub.subject_name, a.date, a.status, a.presence_score
-        FROM attendance a
-        JOIN students s ON a.student_id = s.id
-        JOIN subjects sub ON a.subject_id = sub.id
-    """)
+    if "student_id" in request.user:
+        cur.execute("""
+            SELECT sub.subject_name, a.date, a.status, a.presence_score
+            FROM attendance a
+            JOIN subjects sub ON a.subject_id = sub.id
+            WHERE a.student_id = %s
+        """, (request.user["student_id"],))
 
-    return jsonify(cur.fetchall())
+    elif "teacher_id" in request.user:
+        cur.execute("""
+            SELECT s.name, sub.subject_name, a.date, a.status, a.presence_score
+            FROM attendance a
+            JOIN students s ON a.student_id = s.id
+            JOIN subjects sub ON a.subject_id = sub.id
+            WHERE a.teacher_id = %s
+        """, (request.user["teacher_id"],))
+
+    else:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    rows = cur.fetchall()
+    cur.close()
+    db.close()
+
+    return jsonify(rows), 200

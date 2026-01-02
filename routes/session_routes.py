@@ -6,18 +6,21 @@ import datetime
 
 session_bp = Blueprint("session", __name__)
 
+# In-memory session store
 session_data = {}
 
+# ================= AUTH DECORATOR =================
 def auth_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         auth = request.headers.get("Authorization")
-        if not auth:
+        if not auth or not auth.startswith("Bearer "):
             return jsonify({"error": "Token missing"}), 401
 
-        token = auth.replace("Bearer ", "")
+        token = auth.split(" ", 1)[1]
         data = verify_token(token)
-        if not data:
+
+        if not data or "teacher_id" not in data:
             return jsonify({"error": "Invalid token"}), 401
 
         request.user = data
@@ -25,38 +28,39 @@ def auth_required(f):
     return wrapper
 
 
-
-# ---------------- START SESSION ----------------
-@session_bp.route("/start_session", methods=["POST"])
+# ================= GET CLASSES & SUBJECTS =================
+@session_bp.route("/start_session", methods=["GET"])
 @auth_required
 def start_session():
     teacher_id = request.user["teacher_id"]
 
     db = get_db()
-    cur = db.cursor()
+    cur = db.cursor(dictionary=True)
 
     cur.execute("""
-        SELECT c.id, s.id
-        FROM classes c
-        JOIN subjects s ON c.subject_id = s.id
-        WHERE s.teacher_id = %s
+        SELECT 
+            c.id AS class_id,
+            c.class_name,
+            s.id AS subject_id,
+            s.subject_name
+        FROM teacher_subjects ts
+        JOIN subjects s ON ts.subject_id = s.id
+        JOIN class_subjects cs ON cs.subject_id = s.id
+        JOIN classes c ON cs.class_id = c.id
+        WHERE ts.teacher_id = %s
     """, (teacher_id,))
 
     rows = cur.fetchall()
+    cur.close()
+    db.close()
 
     if not rows:
-        return jsonify({"error": "No class found for teacher"}), 400
+        return jsonify({"error": "No classes assigned"}), 400
 
-    return jsonify({
-        "classes": [
-            {
-                "class_id": r[0],
-                "subject_id": r[1]
-            } for r in rows
-        ]
-    })
+    return jsonify(rows), 200
 
-#-----------------START CASS SESSIOIN ----------------
+
+# ================= START CLASS SESSION =================
 @session_bp.route("/start_class_session", methods=["POST"])
 @auth_required
 def start_class_session():
@@ -74,16 +78,18 @@ def start_class_session():
     db = get_db()
     cur = db.cursor()
 
-    # 🔐 Ownership validation
+    # 🔐 Validate ownership
     cur.execute("""
         SELECT 1
-        FROM classes c
-        JOIN subjects s ON c.subject_id = s.id
-        WHERE c.id = %s AND s.id = %s AND s.teacher_id = %s
-    """, (class_id, subject_id, teacher_id))
+        FROM teacher_subjects ts
+        JOIN class_subjects cs ON cs.subject_id = ts.subject_id
+        WHERE ts.teacher_id = %s
+          AND ts.subject_id = %s
+          AND cs.class_id = %s
+    """, (teacher_id, subject_id, class_id))
 
     if not cur.fetchone():
-        return jsonify({"error": "Unauthorized class access"}), 403
+        return jsonify({"error": "Unauthorized session"}), 403
 
     session_data[class_id] = {
         "teacher_id": teacher_id,
@@ -92,4 +98,4 @@ def start_class_session():
         "started_at": datetime.datetime.utcnow()
     }
 
-    return jsonify({"status": "session started"})
+    return jsonify({"status": "Session started"}), 200
