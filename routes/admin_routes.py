@@ -145,11 +145,174 @@ def admin_login():
         if db:
             db.close()
 
+#================ CREATE STUDENT LOGIN =================
+@admin_bp.route("/create_student_login", methods=["POST"])
+@rate_limit(10, 60)
+@admin_required
+def create_student_login():
+    data = request.json
+    required = ["student_id", "email", "password"]
+
+    if not data or not all(k in data for k in required):
+        return jsonify({"error": "student_id, email, password required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM students WHERE id = %s", (data["student_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid student_id"}), 400
+
+    cur.execute("SELECT id FROM student_auth WHERE email = %s", (data["email"],))
+    if cur.fetchone():
+        return jsonify({"error": "Email already exists"}), 409
+
+    from werkzeug.security import generate_password_hash
+    password_hash = generate_password_hash(data["password"])
+
+    cur.execute("""
+        INSERT INTO student_auth (student_id, email, password_hash, is_verified)
+        VALUES (%s, %s, %s, 1)
+    """, (data["student_id"], data["email"], password_hash))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Student login created"}), 201
+
+
+#================ CREATE TEACHER LOGIN =================
+@admin_bp.route("/create_teacher_login", methods=["POST"])
+@rate_limit(10, 60)
+@admin_required
+def create_teacher_login():
+    data = request.json
+    required = ["teacher_id", "email", "password"]
+
+    if not data or not all(k in data for k in required):
+        return jsonify({"error": "teacher_id, email, password required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM teachers WHERE id = %s", (data["teacher_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid teacher_id"}), 400
+
+    cur.execute("SELECT id FROM teacher_auth WHERE email = %s", (data["email"],))
+    if cur.fetchone():
+        return jsonify({"error": "Email already exists"}), 409
+
+    from werkzeug.security import generate_password_hash
+    password_hash = generate_password_hash(data["password"])
+
+    cur.execute("""
+        INSERT INTO teacher_auth (teacher_id, email, password_hash, is_verified)
+        VALUES (%s, %s, %s, 1)
+    """, (data["teacher_id"], data["email"], password_hash))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Teacher login created"}), 201
+
+# ================= ENROLL STUDENT FACE =================
+
+@admin_bp.route("/enroll_student_face", methods=["POST"])
+@rate_limit(5, 60)
+@admin_required
+def enroll_student_face():
+    db = None
+    cur = None
+    try:
+        data = request.json
+        if not data or "student_id" not in data:
+            return jsonify({"error": "student_id required"}), 400
+
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+
+        cur.execute("SELECT id FROM students WHERE id = %s", (data["student_id"],))
+        if not cur.fetchone():
+            return jsonify({"error": "Invalid student_id"}), 400
+
+        embedding, error = capture_face_embedding()
+        if error:
+            return jsonify({"error": error}), 400
+
+        cur.execute("""
+            UPDATE students
+            SET face_embedding = %s
+            WHERE id = %s
+        """, (embedding.tobytes(), data["student_id"]))
+
+        db.commit()
+        logger.info(f"Student face enrolled: {data['student_id']}")
+
+        return jsonify({"status": "Student face enrolled"}), 200
+
+    except Exception:
+        logger.error("Student face enrollment failed", exc_info=True)
+        return jsonify({"error": "Internal Server Error"}), 500
+
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
+
+# ================= ENROLL TEACHER FACE =================
+@admin_bp.route("/enroll_teacher_face", methods=["POST"])
+@rate_limit(5, 60)
+@admin_required
+def enroll_teacher_face():
+    db = None
+    cur = None
+    try:
+        data = request.json
+        if not data or "teacher_id" not in data:
+            return jsonify({"error": "teacher_id required"}), 400
+
+        db = get_db()
+        cur = db.cursor(dictionary=True)
+
+        cur.execute("SELECT id FROM teachers WHERE id = %s", (data["teacher_id"],))
+        if not cur.fetchone():
+            return jsonify({"error": "Invalid teacher_id"}), 400
+
+        embedding, error = capture_face_embedding()
+        if error:
+            return jsonify({"error": error}), 400
+
+        cur.execute("""
+            UPDATE teachers
+            SET face_embedding = %s
+            WHERE id = %s
+        """, (embedding.tobytes(), data["teacher_id"]))
+
+        db.commit()
+        logger.info(f"Teacher face enrolled: {data['teacher_id']}")
+
+        return jsonify({"status": "Teacher face enrolled"}), 200
+
+    except Exception:
+        logger.error("Teacher face enrollment failed", exc_info=True)
+        return jsonify({"error": "Internal Server Error"}), 500
+
+    finally:
+        if cur:
+            cur.close()
+        if db:
+            db.close()
+
 
 # ================= CREATE TEACHER =================
 @admin_bp.route("/create_teacher", methods=["POST"])
-@admin_required
 @rate_limit(20, 60)
+@admin_required
 def create_teacher():
     db = None
     cur = None
@@ -299,3 +462,96 @@ def create_subject():
             cur.close()
         if db:
             db.close()
+
+
+#=========ASSIGN SUBJECT TO TEACHER======
+@admin_bp.route("/assign_subject_teacher", methods=["POST"])
+@rate_limit(10, 60)
+@admin_required
+def assign_subject_teacher():
+    data = request.json
+    if not data or "teacher_id" not in data or "subject_id" not in data:
+        return jsonify({"error": "teacher_id and subject_id required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM teachers WHERE id = %s", (data["teacher_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid teacher_id"}), 400
+
+    cur.execute("SELECT id FROM subjects WHERE id = %s", (data["subject_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid subject_id"}), 400
+
+    cur.execute("""
+        INSERT IGNORE INTO teacher_subjects (teacher_id, subject_id)
+        VALUES (%s, %s)
+    """, (data["teacher_id"], data["subject_id"]))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Subject assigned to teacher"}), 200
+
+#===========ASSSIGN SUBJECT TO TEACHER =========
+@admin_bp.route("/assign_subject_class", methods=["POST"])
+@rate_limit(10, 60)
+@admin_required
+def assign_subject_class():
+    data = request.json
+    if not data or "class_id" not in data or "subject_id" not in data:
+        return jsonify({"error": "class_id and subject_id required"}), 400
+
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("SELECT id FROM classes WHERE id = %s", (data["class_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid class_id"}), 400
+
+    cur.execute("SELECT id FROM subjects WHERE id = %s", (data["subject_id"],))
+    if not cur.fetchone():
+        return jsonify({"error": "Invalid subject_id"}), 400
+
+    cur.execute("""
+        INSERT IGNORE INTO class_subjects (class_id, subject_id)
+        VALUES (%s, %s)
+    """, (data["class_id"], data["subject_id"]))
+
+    db.commit()
+    cur.close()
+    db.close()
+
+    return jsonify({"status": "Subject assigned to class"}), 200
+
+
+#======== TEACHER OVERVIEW=======
+@admin_bp.route("/teacher_overview/<int:teacher_id>", methods=["GET"])
+@admin_required
+def teacher_overview(teacher_id):
+    db = get_db()
+    cur = db.cursor(dictionary=True)
+
+    cur.execute("""
+        SELECT 
+            t.id AS teacher_id,
+            t.name AS teacher_name,
+            s.id AS subject_id,
+            s.subject_name,
+            c.id AS class_id,
+            c.class_name
+        FROM teacher_subjects ts
+        JOIN teachers t ON ts.teacher_id = t.id
+        JOIN subjects s ON ts.subject_id = s.id
+        JOIN class_subjects cs ON cs.subject_id = s.id
+        JOIN classes c ON cs.class_id = c.id
+        WHERE t.id = %s
+    """, (teacher_id,))
+
+    rows = cur.fetchall()
+    cur.close()
+    db.close()
+
+    return jsonify(rows), 200
