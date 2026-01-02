@@ -106,6 +106,10 @@ def teacher_login():
 
     if not check_password_hash(row[2], data["password"]):
         return jsonify({"error": "Incorrect password"}), 401
+    
+    if not row["is_verified"]:
+        return jsonify({"error": "Email not verified"}), 403
+
 
     token = generate_token({"teacher_id": row[0]})
 
