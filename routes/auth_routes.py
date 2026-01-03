@@ -15,47 +15,54 @@ def teacher_login_face():
     db = get_db()
     cur = db.cursor(dictionary=True)
 
-    cap = cv2.VideoCapture(CAMERA_INDEX)
-    ret, frame = cap.read()
+    cap = cv2.VideoCapture(CAMERA_INDEX, cv2.CAP_DSHOW)
+    if not cap.isOpened():
+        return jsonify({"error": "Camera not accessible"}), 500
+
+    start_time = time.time()
+    teacher_id = None
+
+    while time.time() - start_time < 10:  # 10 seconds window
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        frame = cv2.flip(frame, 1)
+
+        if blink_detect(frame):
+            emb = get_embedding(frame)
+            if emb is None:
+                continue
+
+            cur.execute("""
+                SELECT id, face_embedding
+                FROM teachers
+                WHERE face_embedding IS NOT NULL
+            """)
+
+            teachers = {
+                row["id"]: np.frombuffer(row["face_embedding"], dtype=np.float64)
+                for row in cur.fetchall()
+            }
+
+            teacher_id = match_face(emb, teachers)
+            if teacher_id:
+                break
+
     cap.release()
-
-    if not ret:
-        return jsonify({"error": "Camera error"}), 500
-
-    frame = cv2.flip(frame, 1)
-
-    if not blink_detect(frame):
-        return jsonify({"error": "Blink not detected"}), 403
-
-    emb = get_embedding(frame)
-    if emb is None:
-        return jsonify({"error": "Face not detected"}), 400
-
-    cur.execute("""
-        SELECT id, face_embedding
-        FROM teachers
-        WHERE face_embedding IS NOT NULL
-    """)
-
-    teachers = {
-        row["id"]: np.frombuffer(row["face_embedding"], dtype=np.float64)
-        for row in cur.fetchall()
-    }
-
-    teacher_id = match_face(emb, teachers)
+    cur.close()
+    db.close()
 
     if not teacher_id:
         return jsonify({"error": "Teacher not recognized"}), 401
 
     token = generate_token({"teacher_id": teacher_id})
-
-    cur.close()
-    db.close()
-
     return jsonify({
         "token": token,
         "teacher_id": teacher_id
     }), 200
+
+
 
 @auth_bp.route("/student/login_face", methods=["POST"])
 def student_login_face():
