@@ -6,6 +6,7 @@ from utils.face_utils import get_embedding, match_face
 from utils.spoofing import blink_detect
 from utils.auth import generate_token
 from config import CAMERA_INDEX
+import time 
 
 auth_bp = Blueprint("auth", __name__)
 
