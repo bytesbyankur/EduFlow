@@ -9,12 +9,10 @@ from routes.admin_routes import admin_bp
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# Serve frontend
 @app.route("/")
 def home():
     return send_from_directory("static", "index.html")
 
-# API routes (REAL backend)
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(session_bp, url_prefix="/api/session")
 app.register_blueprint(attendance_bp, url_prefix="/api/attendance")
