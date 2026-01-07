@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduFlow Backend Tester</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --bg: #f4f7f6;
+            --text: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Left Panel: Camera */
+        .camera-panel {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+            margin-bottom: 15px;
+            transform: scaleX(-1);
+            /* Mirror effect */
+        }
+
+        .controls {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-start {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-stop {
+            background: #ff7675;
+            color: white;
+        }
+
+        .status-box {
+            padding: 10px;
+            border-radius: 6px;
+            background: #eee;
+            font-family: monospace;
+            min-height: 20px;
+        }
+
+        /* Right Panel: Live Database */
+        .data-panel {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            height: 80vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            color: var(--primary);
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .new-entry {
+            animation: highlight 2s;
+        }
+
+        @keyframes highlight {
+            0% {
+                background: #dff9fb;
+            }
+
+            100% {
+                background: transparent;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="camera-panel">
+        <h2>📷 Face Scanner</h2>
+        <div style="position: relative;">
+            <video id="video" autoplay muted></video>
+            <div id="overlay"
+                style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:white; padding:5px 10px; border-radius:4px; font-size:12px; display:none;">
+                Auto-Mode On</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-start" onclick="startSystem()">▶ Start Auto-Scan</button>
+            <button class="btn-stop" onclick="stopSystem()">⏹ Stop</button>
+        </div>
+
+        <div class="status-box" id="status">System Ready. Click Start.</div>
+    </div>
+
+    <div class="data-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>📊 Live Attendance Log</h2>
+            <button onclick="resetAttendance()"
+                style="background:#ff7675; color:white; font-size:12px; margin-left:10px;">🗑️ Reset All</button>
+            <button onclick="fetchLogs()" style="background:#dfe6e9; color:#333; font-size:12px;">Refresh List</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student Name</th>
+                    <th>Time</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="logTable">
+                <tr>
+                    <td colspan="4">Loading data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const statusEl = document.getElementById('status');
+        let scanInterval = null;
+
+        // --- 1. CAMERA FUNCTIONS ---
+        async function startSystem() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                statusEl.innerText = "Camera Active. Starting Auto-Scan...";
+                document.getElementById('overlay').style.display = 'block';
+
+                // Start the loop: Scan every 3 seconds
+                scanInterval = setInterval(captureAndScan, 3000);
+            } catch (err) {
+                statusEl.innerText = "❌ Error: " + err.message;
+            }
+        }
+
+        function stopSystem() {
+            clearInterval(scanInterval);
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            statusEl.innerText = "System Stopped.";
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // --- 2. SEND IMAGE TO BACKEND ---
+        function captureAndScan() {
+            if (!video.srcObject) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+
+            statusEl.innerText = "🔍 Scanning...";
+            statusEl.style.color = "#555";
+
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('file', blob, 'scan.jpg');
+
+                fetch('http://127.0.0.1:8000/mark-attendance', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            // Success!
+                            const names = data.students.join(", ");
+                            statusEl.innerHTML = `✅ <b>Identified:</b> ${names}`;
+                            statusEl.style.color = "green";
+
+                            // Immediately refresh the table to show the new record
+                            fetchLogs();
+                        } else {
+                            statusEl.innerText = "Scanning... (No known faces)";
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        statusEl.innerText = "⚠️ Backend Error (Is Python running?)";
+                        statusEl.style.color = "red";
+                    });
+            }, 'image/jpeg');
+        }
+        function resetAttendance() {
+            if (!confirm("Are you sure you want to clear all attendance data?")) return;
+
+            fetch('http://127.0.0.1:8000/reset-attendance', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchLogs(); // Refresh the table to show it's empty
+                });
+        }
+
+        // --- 3. FETCH DATABASE LOGS ---
+        function fetchLogs() {
+            fetch('http://127.0.0.1:8000/get-attendance')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('logTable');
+                    tbody.innerHTML = ""; // Clear existing
+
+                    if (data.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='4'>No records yet.</td></tr>";
+                        return;
+                    }
+
+                    data.forEach(row => {
+                        // Row format from SQLite: [id, name, time, date]
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                        <td>#${row[0]}</td>
+                        <td><b>${row[1]}</b></td>
+                        <td>${row[2]}</td>
+                        <td>${row[3]}</td>
+                    `;
+                        // Highlight the most recent entry
+                        if (row === data[0]) tr.classList.add("new-entry");
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        // Load logs on page load
+        fetchLogs();
+        // Auto-refresh logs every 5 seconds just in case
+        setInterval(fetchLogs, 5000);
+
+    </script>
+</body>
+
+</html>
