@@ -4,15 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EduFlow | Faculty Portal</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        @keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
+    </style>
 </head>
-<body class="min-h-screen flex overflow-hidden">
 
-    <!-- --- SIDEBAR (Navy Blue) --- -->
+<body class="min-h-screen flex overflow-hidden bg-[#f8fafc]">
+
     <aside class="w-72 bg-[#0f172a] text-slate-400 p-8 hidden lg:flex flex-col border-r border-slate-800 shrink-0">
         <div class="flex items-center space-x-3 mb-12">
             <div class="w-10 h-10 bg-[#7c3aed] rounded-xl flex items-center justify-center shadow-lg shadow-purple-900/40">
@@ -20,303 +23,163 @@
             </div>
             <span class="text-2xl font-black text-white tracking-tighter">EduFlow</span>
         </div>
-
         <nav class="flex-1 space-y-3">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em]">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] bg-white/10 text-white">
                 <i data-lucide="layout-dashboard" class="mr-4 w-5 h-5"></i> Dashboard
             </button>
             <button onclick="switchTab('students')" id="nav-students" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
                 <i data-lucide="users" class="mr-4 w-5 h-5"></i> My Students
             </button>
-            <button onclick="switchTab('attendance')" id="nav-attendance" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
-                <i data-lucide="check-square" class="mr-4 w-5 h-5"></i> Attendance
-            </button>
             <button onclick="switchTab('cloud')" id="nav-cloud" class="sidebar-item flex items-center w-full p-4 rounded-2xl transition-all duration-300 font-black text-xs uppercase tracking-[0.2em] hover:text-slate-300 hover:bg-white/5">
                 <i data-lucide="folder-open" class="mr-4 w-5 h-5"></i> Note Cloud
             </button>
         </nav>
-
         <div class="mt-auto pt-8 border-t border-slate-800">
-            <div class="bg-gradient-to-br from-[#1e1b4b] to-[#0f172a] p-4 rounded-2xl border border-white/5 mb-6 text-center">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-purple-400 mb-1">Faculty Access</p>
-                <p class="text-xs text-slate-300 font-bold">Admin Portal v2.0</p>
-            </div>
-            <button class="flex items-center w-full p-3 hover:text-white transition-colors">
+            <button onclick="window.location.href='../frontpage/index.html'" class="flex items-center w-full p-3 hover:text-white transition-colors">
                 <i data-lucide="log-out" class="mr-3 w-5 h-5"></i> Sign Out
             </button>
         </div>
     </aside>
 
-    <!-- --- MAIN CONTENT --- -->
     <main class="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 custom-scrollbar">
         
-        <!-- Header -->
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
             <div>
                 <h1 class="text-4xl font-black tracking-tight text-[#0f172a]">Faculty Dashboard</h1>
                 <p class="text-slate-500 font-medium mt-1">Welcome back, <span class="text-[#7c3aed]">Professor Miller</span>.</p>
             </div>
-            <div class="flex items-center space-x-4">
-                <button class="p-3 bg-white rounded-2xl shadow-sm border border-slate-200 text-slate-400 hover:text-[#7c3aed] transition-colors relative">
-                    <i data-lucide="bell" class="w-5.5 h-5.5"></i>
-                    <span class="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-                <div class="flex items-center bg-white p-2 pr-4 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="w-10 h-10 bg-[#d8b4fe] rounded-xl flex items-center justify-center text-[#7c3aed] font-black mr-3">TM</div>
-                    <div class="text-left hidden sm:block">
-                        <p class="text-xs font-black text-slate-900">Thomas Miller</p>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Head of AI Dept</p>
-                    </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative group">
+                    <select id="class-selector" onchange="updateClassContext()" class="appearance-none bg-white pl-4 pr-10 py-3 rounded-2xl border border-slate-200 font-bold text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer shadow-sm">
+                        <option value="Advanced Neural Networks">Advanced Neural Networks</option>
+                        <option value="Ethics in AI">Ethics in AI</option>
+                        <option value="Computer Vision 101">Computer Vision 101</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
                 </div>
             </div>
         </header>
 
-        <!-- --- Tab: Dashboard (Overview) --- -->
-        <div id="tab-content-dashboard" class="animate-fade-in grid grid-cols-1 xl:grid-cols-3 gap-8 tab-view">
-            <!-- Left Column -->
+        <div id="tab-content-dashboard" class="tab-view animate-fade-in grid grid-cols-1 xl:grid-cols-3 gap-8">
             <div class="xl:col-span-2 space-y-8">
-                <!-- Stats Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
-                        <div class="p-4 rounded-[20px] bg-purple-50 text-purple-600 border border-purple-100 w-fit mb-6">
-                            <i data-lucide="users" class="w-5 h-5"></i>
-                        </div>
-                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Total Students</h3>
-                        <p class="text-3xl font-black text-slate-900 mt-2">142</p>
+                    <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                        <div class="p-4 rounded-[20px] bg-purple-50 text-purple-600 w-fit mb-6"><i data-lucide="users" class="w-5 h-5"></i></div>
+                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Enrolled Students</h3>
+                        <p id="stat-total" class="text-3xl font-black text-slate-900 mt-2">--</p>
                     </div>
-                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
-                        <div class="p-4 rounded-[20px] bg-indigo-50 text-indigo-600 border border-indigo-100 w-fit mb-6">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                        </div>
-                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Avg. Attendance</h3>
-                        <p class="text-3xl font-black text-slate-900 mt-2">94.2%</p>
+                    <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                        <div class="p-4 rounded-[20px] bg-indigo-50 text-indigo-600 w-fit mb-6"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                        <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Present Today</h3>
+                        <p id="stat-present" class="text-3xl font-black text-slate-900 mt-2">--</p>
                     </div>
-                    <div class="stat-card bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 group transition-all">
-                        <div class="p-4 rounded-[20px] bg-blue-50 text-blue-600 border border-blue-100 w-fit mb-6">
-                            <i data-lucide="cloud" class="w-5 h-5"></i>
-                        </div>
+                    <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                        <div class="p-4 rounded-[20px] bg-blue-50 text-blue-600 w-fit mb-6"><i data-lucide="cloud" class="w-5 h-5"></i></div>
                         <h3 class="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Note Storage</h3>
                         <p class="text-3xl font-black text-slate-900 mt-2">12.8 GB</p>
                     </div>
                 </div>
 
-                <!-- Recent Activity Table -->
                 <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="flex justify-between items-center mb-8">
-                        <h3 class="text-xl font-black tracking-tight text-slate-800">Recent Student Progress</h3>
-                        <button onclick="switchTab('students')" class="text-xs font-black text-[#7c3aed] uppercase tracking-widest bg-purple-50 px-4 py-2 rounded-xl transition-colors hover:bg-purple-100">View All</button>
-                    </div>
+                    <h3 class="text-xl font-black tracking-tight text-slate-800 mb-8">Recent Student Progress</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50/50">
                                 <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                     <th class="px-6 py-4">Reg ID</th>
                                     <th class="px-6 py-4">Student Name</th>
-                                    <th class="px-6 py-4">Engagement</th>
-                                    <th class="px-6 py-4">Progress</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4">Time</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-6 py-4 text-sm font-bold">REG-2025-0982</td>
-                                    <td class="px-6 py-4 text-sm font-black">Alice Johnson</td>
-                                    <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase">95% Active</span></td>
-                                    <td class="px-6 py-4">
-                                        <div class="w-24 h-1.5 bg-slate-100 rounded-full">
-                                            <div class="bg-[#7c3aed] h-1.5 rounded-full" style="width: 88%;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-slate-50 transition-colors">
-                                    <td class="px-6 py-4 text-sm font-bold">REG-2025-1044</td>
-                                    <td class="px-6 py-4 text-sm font-black">Marcus Chen</td>
-                                    <td class="px-6 py-4"><span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase">82% Active</span></td>
-                                    <td class="px-6 py-4">
-                                        <div class="w-24 h-1.5 bg-slate-100 rounded-full">
-                                            <div class="bg-[#7c3aed] h-1.5 rounded-full" style="width: 72%;"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
+                            <tbody id="attendance-table" class="divide-y divide-slate-100"></tbody>
                         </table>
                     </div>
                 </section>
             </div>
 
-            <!-- Right Column -->
             <div class="space-y-8">
-                <!-- Quick Tasks -->
                 <section class="bg-[#0f172a] p-8 rounded-[40px] text-white shadow-xl relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl rounded-full"></div>
                     <h3 class="text-lg font-black tracking-[0.1em] uppercase text-purple-300 mb-8 relative z-10">Quick Actions</h3>
-                    <div class="space-y-4 relative z-10">
-                        <button onclick="switchTab('attendance')" class="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group">
-                            <div class="p-3 bg-purple-500/20 text-purple-300 rounded-xl mr-4"><i data-lucide="check-square" class="w-5 h-5"></i></div>
-                            <span class="text-sm font-bold">Mark Attendance</span>
-                        </button>
-                        <button onclick="switchTab('cloud')" class="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group">
-                            <div class="p-3 bg-blue-500/20 text-blue-300 rounded-xl mr-4"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
-                            <span class="text-sm font-bold">Upload Lecture Notes</span>
-                        </button>
-                    </div>
-                </section>
-
-                <!-- Class Schedule -->
-                <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
-                    <h3 class="text-lg font-black text-slate-900 mb-6">Today's Schedule</h3>
-                    <div class="space-y-6">
-                        <div class="flex items-start space-x-4">
-                            <div class="p-3 bg-slate-50 rounded-xl text-slate-400 font-bold text-xs">09:00</div>
-                            <div>
-                                <h4 class="text-sm font-black text-slate-800">Advanced Neural Networks</h4>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Lecture Hall 4A • 42 Students</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-4">
-                            <div class="p-3 bg-slate-50 rounded-xl text-slate-400 font-bold text-xs">11:30</div>
-                            <div>
-                                <h4 class="text-sm font-black text-slate-800">Ethics in AI (Seminar)</h4>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Discussion Room B • 15 Students</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        <!-- --- Tab: My Students --- -->
-        <div id="tab-content-students" class="animate-fade-in hidden tab-view">
-            <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Student Directory</h2>
-                    <div class="relative w-full sm:w-64">
-                        <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
-                        <input type="text" placeholder="Search by name or ID..." class="pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm w-full outline-none focus:ring-4 focus:ring-purple-100 transition-all">
-                    </div>
-                </div>
-                <!-- Student Table - Expanded -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-50/50">
-                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <th class="px-8 py-5">Registration ID</th>
-                                <th class="px-8 py-5">Full Name</th>
-                                <th class="px-8 py-5">Course Load</th>
-                                <th class="px-8 py-5">Attendance %</th>
-                                <th class="px-8 py-5">Operations</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            <!-- Student Row 1 -->
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-8 py-5 text-sm font-bold text-slate-500">REG-2025-0982</td>
-                                <td class="px-8 py-5 text-sm font-black text-slate-800">Alice Johnson</td>
-                                <td class="px-8 py-5 text-xs font-bold text-slate-400">5 Active Courses</td>
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-16 h-1.5 bg-slate-100 rounded-full">
-                                            <div class="bg-green-500 h-1.5 rounded-full" style="width: 95%;"></div>
-                                        </div>
-                                        <span class="text-xs font-black text-slate-900">95%</span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-5">
-                                    <button class="text-[#7c3aed] text-xs font-black uppercase tracking-widest hover:underline mr-4">Analyze</button>
-                                    <button class="text-slate-300 text-xs font-black uppercase tracking-widest hover:text-slate-500">Edit</button>
-                                </td>
-                            </tr>
-                            <!-- More rows can be added dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
-
-        <!-- --- Tab: Attendance --- -->
-        <div id="tab-content-attendance" class="animate-fade-in hidden tab-view">
-            <div class="max-w-4xl mx-auto space-y-8">
-                <section class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
-                    <div class="flex items-center justify-between mb-8">
-                        <div>
-                            <h2 class="text-2xl font-black text-slate-900 tracking-tight">Mark Attendance</h2>
-                            <p class="text-sm text-slate-500">Select class and date to record presence.</p>
-                        </div>
-                        <div class="text-right">
-                            <p id="current-date" class="text-sm font-black text-[#7c3aed]">October 25, 2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Select Subject</label>
-                            <select class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-purple-100">
-                                <option>Advanced Neural Networks</option>
-                                <option>Ethics in AI</option>
-                                <option>Computer Vision 101</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Class Type</label>
-                            <div class="flex space-x-4">
-                                <button class="flex-1 py-4 bg-[#7c3aed] text-white rounded-2xl text-sm font-bold">Lecture</button>
-                                <button class="flex-1 py-4 bg-slate-50 text-slate-400 border border-slate-100 rounded-2xl text-sm font-bold hover:bg-slate-100 transition-colors">Lab</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="p-6 bg-slate-50 rounded-3xl flex items-center justify-between">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-bold text-xs text-slate-400 mr-4">01</div>
-                                <span class="font-black text-slate-800">Alice Johnson</span>
-                            </div>
-                            <div class="flex space-x-3">
-                                <button class="px-6 py-2 bg-green-500 text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-green-600 action-btn">Present</button>
-                                <button class="px-6 py-2 bg-white text-slate-400 border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest transition-all hover:bg-slate-100 action-btn">Absent</button>
-                            </div>
-                        </div>
-                        <!-- More student rows for attendance -->
-                    </div>
-
-                    <button class="w-full mt-10 py-5 bg-[#0f172a] text-white rounded-[24px] text-sm font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-navy-900/20 transition-all active:scale-[0.98]">
-                        Confirm & Save Attendance
+                    <button onclick="startScanner()" class="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group cursor-pointer relative z-10 mb-4">
+                        <div class="p-3 bg-purple-500/20 text-purple-300 rounded-xl mr-4"><i data-lucide="check-square" class="w-5 h-5"></i></div>
+                        <span class="text-sm font-bold text-white">Mark Attendance</span>
+                    </button>
+                    <button onclick="switchTab('cloud')" class="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group relative z-10">
+                        <div class="p-3 bg-blue-500/20 text-blue-300 rounded-xl mr-4"><i data-lucide="upload-cloud" class="w-5 h-5"></i></div>
+                        <span class="text-sm font-bold">Upload Lecture Notes</span>
                     </button>
                 </section>
             </div>
         </div>
 
-        <!-- --- Tab: Note Cloud --- -->
-        <div id="tab-content-cloud" class="animate-fade-in hidden tab-view">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
-                <div>
-                    <h2 class="text-3xl font-black text-[#0f172a] tracking-tight">Digital Note Cloud</h2>
-                    <p class="text-slate-500 font-medium">Manage and distribute academic resources.</p>
+        <div id="tab-content-students" class="tab-view animate-fade-in hidden">
+             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Student Directory</h2>
+                <div class="flex gap-3">
+                    <a href="http://127.0.0.1:8000/export-csv" target="_blank" class="flex items-center px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                        <i data-lucide="download" class="w-4 h-4 mr-2"></i> Export
+                    </a>
+                    <button onclick="openRegistrationModal()" class="flex items-center px-6 py-3 bg-[#7c3aed] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-900/20">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Student
+                    </button>
                 </div>
-                <button class="px-8 py-4 bg-[#7c3aed] text-white rounded-[20px] text-sm font-black uppercase tracking-widest flex items-center shadow-lg shadow-purple-900/20 hover:bg-[#6d28d9] transition-all">
-                    <i data-lucide="upload-cloud" class="mr-2 w-5 h-5"></i> Upload New Note
-                </button>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- File Card 1 -->
-                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:border-purple-200 transition-all group">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="p-4 bg-purple-50 text-purple-600 rounded-2xl">
-                            <i data-lucide="file-text" class="w-8 h-8"></i>
-                        </div>
-                        <button class="text-slate-300 hover:text-slate-500"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
-                    </div>
-                    <h4 class="text-lg font-black text-slate-800 tracking-tight mb-1 truncate">Lecture 12 - RNNs</h4>
-                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-4">PDF • 2.4 MB • Oct 24</p>
-                    <div class="flex items-center text-xs text-slate-500 font-bold bg-slate-50 p-3 rounded-xl">
-                        <i data-lucide="eye" class="w-4 h-4 mr-2"></i> 102 Students Viewed
-                    </div>
-                </div>
-                <!-- Add more file cards -->
+            <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50">
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <th class="px-6 py-4">Name</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="roster-table" class="divide-y divide-slate-100"></tbody>
+                </table>
             </div>
         </div>
 
+        <div id="tab-content-cloud" class="tab-view animate-fade-in hidden">
+            <h2 class="text-3xl font-black text-[#0f172a] mb-6">Digital Note Cloud</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:border-purple-200 transition-all">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="p-4 bg-purple-50 text-purple-600 rounded-2xl"><i data-lucide="file-text" class="w-8 h-8"></i></div>
+                    </div>
+                    <h4 class="text-lg font-black text-slate-800">Lecture 12 - RNNs</h4>
+                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-4">PDF • 2.4 MB</p>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <div id="scanner-modal" style="display:none;" class="fixed inset-0 z-[9999] bg-slate-900/90 backdrop-blur-sm flex justify-center items-center">
+        <div class="bg-[#1e293b] p-8 rounded-[32px] border border-slate-700 shadow-2xl w-[500px] text-center">
+            <h2 class="text-2xl font-black text-white mb-2">Scanning Class</h2>
+            <p id="class-context-display" class="text-purple-400 font-bold text-xs uppercase tracking-widest mb-6">Class: Neural Networks</p>
+            <div class="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.4)]">
+                <video id="webcam" width="440" height="330" autoplay class="w-full bg-black scale-x-[-1]"></video>
+                <div class="absolute top-0 left-0 w-full h-1 bg-green-400 shadow-[0_0_15px_#4ade80]" style="animation: scanLine 2s infinite linear;"></div>
+            </div>
+            <p id="scan-status" class="mt-6 font-mono text-sm font-bold text-slate-500">Initializing Camera...</p>
+            <button onclick="stopScanner()" class="mt-6 px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all text-xs uppercase tracking-widest">Close Scanner</button>
+        </div>
+    </div>
+
+    <div id="regModal" style="display:none;" class="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-sm flex justify-center items-center">
+        <div class="bg-white p-8 rounded-[32px] shadow-2xl w-[450px] text-center relative">
+            <h2 class="text-2xl font-black text-slate-900 mb-2">New Student</h2>
+            <input type="text" id="regName" placeholder="Enter Full Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold mb-4">
+            <div class="relative rounded-2xl overflow-hidden bg-black aspect-video mb-6 border-2 border-slate-100">
+                <video id="regVideo" autoplay class="w-full h-full object-cover scale-x-[-1]"></video>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="closeRegModal()" class="py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase tracking-widest">Cancel</button>
+                <button onclick="captureAndRegister()" class="py-3 bg-[#7c3aed] text-white rounded-xl font-black text-xs uppercase tracking-widest">Save</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
