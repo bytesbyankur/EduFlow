@@ -8,13 +8,10 @@ EduFlow is a professional, high-fidelity web platform designed to streamline uni
 * Unified Login System: A clean, centered authentication window with a dynamic role-toggle for Faculty and Students.
 * Faculty Dashboard:
     - Enrolled student analytics.
-    - Average attendance tracking.
-    - Cloud asset management (Class Notes).
-    - Active student health monitoring table.
+    - Attendance tracking.
 * Student Dashboard:
     - Personal performance metrics (GPA, Attendance, Credits).
-    - Digital Vault for syncing and accessing class notes.
-    - Daily schedule tracking and academic advisor access.
+    - Daily Attendance tracking and academic advisor access.
 
 # 🎨 Design Philosophy
 
