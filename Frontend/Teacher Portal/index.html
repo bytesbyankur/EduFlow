@@ -169,14 +169,35 @@
 
     <div id="regModal" style="display:none;" class="fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-sm flex justify-center items-center">
         <div class="bg-white p-8 rounded-[32px] shadow-2xl w-[450px] text-center relative">
-            <h2 class="text-2xl font-black text-slate-900 mb-2">New Student</h2>
-            <input type="text" id="regName" placeholder="Enter Full Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold mb-4">
-            <div class="relative rounded-2xl overflow-hidden bg-black aspect-video mb-6 border-2 border-slate-100">
-                <video id="regVideo" autoplay class="w-full h-full object-cover scale-x-[-1]"></video>
+            <h2 class="text-2xl font-black text-slate-900 mb-6">New Student</h2>
+            
+            <div class="space-y-4">
+                <div class="text-left">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Student Name</label>
+                    <input type="text" id="new-student-name" placeholder="Enter Full Name" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="text-left">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Assign to Class</label>
+                    <div class="relative">
+                        <select id="new-student-class" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-700 cursor-pointer">
+                            <option value="Advanced Neural Networks">Advanced Neural Networks</option>
+                            <option value="Ethics in AI">Ethics in AI</option>
+                            <option value="Computer Vision 101">Computer Vision 101</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <div class="relative rounded-2xl overflow-hidden bg-black aspect-video border-2 border-slate-100 shadow-inner">
+                    <video id="register-video" autoplay class="w-full h-full object-cover scale-x-[-1]"></video>
+                    <canvas id="register-canvas" class="hidden"></canvas>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeRegModal()" class="py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase tracking-widest">Cancel</button>
-                <button onclick="captureAndRegister()" class="py-3 bg-[#7c3aed] text-white rounded-xl font-black text-xs uppercase tracking-widest">Save</button>
+
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="closeRegModal()" class="py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors">Cancel</button>
+                <button id="capture-btn" onclick="registerStudent()" class="py-3 bg-[#7c3aed] text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-purple-700 transition-colors shadow-lg shadow-purple-900/20">Capture & Save</button>
             </div>
         </div>
     </div>
