@@ -1,43 +1,169 @@
-# EduFlow | Your Unified Learning Hub
+EduFlow | AI-Powered Smart Attendance System
+============================================
 
-EduFlow is a professional, high-fidelity web platform designed to streamline university life. It serves as a centralized ecosystem for attendance tracking, digital note management, and academic progress monitoring, featuring tailored experiences for both faculty and students.
+**EduFlow** is a next-generation university platform that automates attendance using Computer Vision and Artificial Intelligence. By integrating **Google's TensorFlow** and facial recognition technology, it eliminates manual roll calls, prevents "proxy" attendance, and provides students with real-time analytics on their academic standing.
 
-# 🚀 Key Features
+🚀 Key Features
+===============
 
-* Interactive Welcome Experience: A high-end entry page featuring staggered letter-by-letter animations, parallax floating educational icons, and a glassmorphism "Enter Experience" portal.
-* Unified Login System: A clean, centered authentication window with a dynamic role-toggle for Faculty and Students.
-* Faculty Dashboard:
-    - Enrolled student analytics.
-    - Attendance tracking.
-* Student Dashboard:
-    - Personal performance metrics (GPA, Attendance, Credits).
-    - Daily Attendance tracking and academic advisor access.
+### 🧠 AI & Automation
 
-# 🎨 Design Philosophy
+-   **Touchless Attendance:** Mark attendance in milliseconds using a webcam and facial recognition.
 
-The platform utilizes a Lavender and Navy Blue palette to balance creative energy with professional authority.
+-   **Class-Specific Intelligence:** The system understands context---scanning a student for "Neural Networks" won't mistakenly mark them present for "Ethics in AI."
 
-* Navy Blue (#0a0f2b, #0f172a): Provides depth, stability, and a high-contrast foundation for professional data management.
-* Lavender & Purple (#7c3aed, #d8b4fe): Used for interactive highlights, glows, and accents to provide a modern, SaaS-like aesthetic.
-* Glassmorphism: Implementation of blurred backgrounds and semi-transparent borders to create a layered, "Apple-style" UI.
+-   **Anti-Spoofing/Proxy Prevention:** Biometric verification ensures only the actual student can mark attendance.
 
-# 🛠️ Tech Stack
+### 🎓 Student Portal
 
-* HTML5/CSS3: Core structure and advanced keyframe animations.
-* Tailwind CSS: Utility-first framework used for responsive layouts and modern styling.
-* Vanilla JavaScript: Lightweight state management for page routing, role-switching, and parallax interactions.
-* Lucide Icons: A clean, consistent SVG icon set for enhanced visual navigation.
+-   **Real-Time Analytics:** Interactive graphs showing attendance trends over the last 7 days.
 
-# 📥 Getting Started
+-   **Full History Log:** A scrollable, date-wise record of every class attended.
 
-1. Save the code from index.html to your local machine.
-2. Open index.html in any modern web browser (Chrome, Firefox, Safari, or Edge).
-3. Ensure you have an active internet connection to load the Tailwind and Lucide CDNs.
+-   **"At Risk" Alerts:** Automatic warnings if attendance drops below the 75% threshold.
 
-# 📁 File Structure
+### 👨‍🏫 Faculty Dashboard
 
-* index.html: The monolithic application file containing all structure, styling, and logic.
-* styles: Internal CSS block for complex keyframe animations (fadeInUp, float, etc.).
-* scripts: Internal JS block handling the MapsTo() router and setRole() state logic.
+-   **Instant Registration:** Onboard new students in seconds by capturing their face and assigning them to classes.
 
-Developed with a focus on making university life easier than ever.
+-   **Live Roster:** View real-time stats on who is present, absent, or enrolled.
+
+-   **Data Export:** Download attendance logs as CSV files for official records.
+
+🛠️ Tech Stack
+==============
+
+**Frontend (Client Layer)**
+
+-   **HTML5 / CSS3:** Core structure and animations.
+
+-   **Tailwind CSS:** Utility-first framework for a modern, responsive UI.
+
+-   **Vanilla JavaScript (ES6+):** Handles webcam streaming, API calls (`fetch`), and state management.
+
+**Backend (Server Layer)**
+
+-   **Python 3.10+:** The core programming language.
+
+-   **FastAPI:** High-performance web framework for handling REST API requests.
+
+-   **SQLite:** Lightweight relational database for storing students, logs, and rosters.
+
+**Artificial Intelligence (The "Google" Tech)**
+
+-   **TensorFlow / Keras:** The deep learning engine powering the inference.
+
+-   **DeepFace:** Computer vision library for face detection and embedding generation.
+
+-   **OpenCV:** Image processing and real-time video capture.
+
+📥 Installation & Setup
+=======================
+
+### Prerequisites
+
+-   **Python 3.8 or higher** installed on your system.
+
+-   A working **Webcam**.
+
+-   An internet connection (for downloading Python libraries and Tailwind/Icon CDNs).
+
+### Step 1: Install Dependencies
+
+Open your terminal or command prompt in the `backend` folder and run:
+
+Bash
+
+```
+pip install fastapi uvicorn numpy pandas opencv-python deepface tensorflow
+
+```
+
+*(Note: The first run might take a moment to download the DeepFace weights).*
+
+### Step 2: Start the Backend Server
+
+In the same terminal (inside the `backend` folder), run:
+
+Bash
+
+```
+python -m uvicorn main:app --reload
+
+```
+
+You should see a message saying: `Uvicorn running on http://127.0.0.1:8000`.
+
+### Step 3: Launch the Application
+
+1.  Go to the `Frontend/frontpage` folder and double-click `index.html`.
+
+2.  Click **"Enter Experience"**.
+
+3.  **Log in:**
+
+    -   **Teacher:** User: `admin`, Pass: `admin`
+
+    -   **Student:** Use the Roll Number generated after registration (e.g., `REG-2025-001`) and default password `password123`.
+
+🏃‍♂️ How to Run the Demo (Hackathon Flow)
+==========================================
+
+1.  **Start the Server:** Ensure the black terminal window is running the FastAPI server.
+
+2.  **Open Teacher Portal:** Login as Admin.
+
+3.  **Register a User:**
+
+    -   Click "Add Student".
+
+    -   Enter your name (e.g., "Swaraj").
+
+    -   **Select a Class** from the dropdown (e.g., "Advanced Neural Networks").
+
+    -   Click "Capture & Save".
+
+4.  **Mark Attendance:**
+
+    -   Select the **SAME class** ("Advanced Neural Networks") from the dashboard dropdown.
+
+    -   Click "Mark Attendance".
+
+    -   Look at the camera -> See the **Green Verified Message**.
+
+5.  **Check Analytics:**
+
+    -   Logout and Login as the Student (`REG-2025-XXX`).
+
+    -   Show the **Attendance Graph** (it should show activity for today).
+
+    -   Scroll down to the **History Log** to see the exact timestamp.
+
+📁 Project Structure
+====================
+
+Plaintext
+
+```
+EduFlow/
+├── backend/
+│   ├── main.py                # The Brain (FastAPI + AI Logic)
+│   ├── attendance.db          # Database (Auto-created)
+│   ├── known_faces/           # Folder storing registered student faces
+│   └── seed_history.py        # Script to generate fake past data for demos
+│
+└── Frontend/
+    ├── frontpage/             # The Landing Page
+    │   └── index.html
+    ├── Teacher Portal/        # Faculty Dashboard
+    │   ├── index.html
+    │   └── script.js
+    └── Student Portal/        # Student Dashboard
+        ├── index.html
+        └── script.js
+
+```
+
+* * * * *
+
+*Developed with ❤️ for the Hackathon.*
