@@ -1,0 +1,24 @@
+# Virtual Environments
+.venv/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite Database & Local Data
+*.db
+*.sqlite3
+
+# DeepFace Weights & Caches
+*.pkl
+known_faces/*.pkl
+temp_scan.jpg
+
+# OS & Editor Files
+.DS_Store
+.vscode/.venv/
+*.sqlite3
+*.db
+__pycache__/
+temp_scan.jpg
