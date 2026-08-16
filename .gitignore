@@ -1,28 +1,23 @@
 # Virtual Environments
 .venv/
+venv/
+env/
+ENV/
 
-# Python Cache & Bytecode
+# Python cache & build files
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+dist/
+build/
 
-# SQLite Database & Local Data
-*.db
+# SQLite Databases & Dynamic Media
 *.sqlite3
-
-# DeepFace Weights & Caches
-*.pkl
+*.db
+temp_scan.jpg
 known_faces/*.pkl
-temp_scan.jpg
 
-# OS & Editor Files
+# OS and Editor files
 .DS_Store
-.vscode/.venv/
-*.sqlite3
-*.db
-__pycache__/
-temp_scan.jpg
-.venv/
-*.sqlite3
-*.db
-__pycache__/
+.vscode/
