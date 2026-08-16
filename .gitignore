@@ -22,3 +22,7 @@ temp_scan.jpg
 *.db
 __pycache__/
 temp_scan.jpg
+.venv/
+*.sqlite3
+*.db
+__pycache__/
