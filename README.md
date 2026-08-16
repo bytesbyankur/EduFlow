@@ -1,169 +1,420 @@
-EduFlow | AI-Powered Smart Attendance System
-============================================
+# EduFlow | AI-Powered Smart Attendance Management System
 
-**EduFlow** is a next-generation university platform that automates attendance using Computer Vision and Artificial Intelligence. By integrating **Google's TensorFlow** and facial recognition technology, it eliminates manual roll calls, prevents "proxy" attendance, and provides students with real-time analytics on their academic standing.
+EduFlow is an automated, computer-vision-driven attendance and academic analytics platform. Powered by **DeepFace**, **TensorFlow**, **Django REST Framework**, and a modern **React (Vite + Tailwind CSS)** client layer, EduFlow eliminates manual roll calls, mitigates proxy attendance through biometric verification, and delivers real-time attendance analytics for students and faculty.
 
-🚀 Key Features
-===============
+---
 
-### 🧠 AI & Automation
+## 🚀 Key Features
 
--   **Touchless Attendance:** Mark attendance in milliseconds using a webcam and facial recognition.
+### 🧠 Computer Vision & Biometrics
 
--   **Class-Specific Intelligence:** The system understands context---scanning a student for "Neural Networks" won't mistakenly mark them present for "Ethics in AI."
+* **Touchless Attendance:** Real-time facial recognition matching against enrolled course rosters in milliseconds.
+* **Class-Specific Filtering:** Smart roster validation ensures a student verified in *Computer Vision 101* is not mistakenly marked present for *Ethics in AI*.
+* **Automated Embeddings Cache:** Optimized representation caching via VGG-Face for rapid inference during live classroom scans.
 
--   **Anti-Spoofing/Proxy Prevention:** Biometric verification ensures only the actual student can mark attendance.
+### 🎓 Student Portal — React SPA
 
-### 🎓 Student Portal
+* **Attendance Analytics:** 7-day rolling activity visualizers tracking daily attendance momentum.
+* **Risk Alerts:** Instant status indicators — *On Track*, *At Risk*, and *Critical* — triggered when attendance falls below the mandatory 75% threshold.
+* **Full Audit History:** Date- and time-stamped attendance logs for every enrolled course.
 
--   **Real-Time Analytics:** Interactive graphs showing attendance trends over the last 7 days.
+### 👨‍🏫 Faculty Dashboard — React SPA
 
--   **Full History Log:** A scrollable, date-wise record of every class attended.
+* **Webcam Integration:** Integrated client-side canvas/webcam controls for rapid student onboarding and real-time scanning.
+* **Live Roster Telemetry:** Real-time visibility into active attendance counts, present vs. absent ratios, and course breakdowns.
+* **CSV Export:** Download official attendance rosters and logs directly from the UI.
 
--   **"At Risk" Alerts:** Automatic warnings if attendance drops below the 75% threshold.
+---
 
-### 👨‍🏫 Faculty Dashboard
+## 🛠️ Tech Stack
 
--   **Instant Registration:** Onboard new students in seconds by capturing their face and assigning them to classes.
+| Layer                    | Technologies                                                        |
+| :----------------------- | :------------------------------------------------------------------ |
+| **Frontend**             | React 18+, Vite, Tailwind CSS, Lucide Icons, Axios                  |
+| **Backend**              | Python 3.11, Django 5.x, Django REST Framework, django-cors-headers |
+| **AI / Computer Vision** | OpenCV, DeepFace, TensorFlow 2.16, tf-keras, NumPy 1.26             |
+| **Database & Storage**   | SQLite3, Local Biometric Vector Store                               |
 
--   **Live Roster:** View real-time stats on who is present, absent, or enrolled.
+---
 
--   **Data Export:** Download attendance logs as CSV files for official records.
-
-🛠️ Tech Stack
-==============
-
-**Frontend (Client Layer)**
-
--   **HTML5 / CSS3:** Core structure and animations.
-
--   **Tailwind CSS:** Utility-first framework for a modern, responsive UI.
-
--   **Vanilla JavaScript (ES6+):** Handles webcam streaming, API calls (`fetch`), and state management.
-
-**Backend (Server Layer)**
-
--   **Python 3.10+:** The core programming language.
-
--   **FastAPI:** High-performance web framework for handling REST API requests.
-
--   **SQLite:** Lightweight relational database for storing students, logs, and rosters.
-
-**Artificial Intelligence (The "Google" Tech)**
-
--   **TensorFlow / Keras:** The deep learning engine powering the inference.
-
--   **DeepFace:** Computer vision library for face detection and embedding generation.
-
--   **OpenCV:** Image processing and real-time video capture.
-
-📥 Installation & Setup
-=======================
+## 📥 Installation & Setup
 
 ### Prerequisites
 
--   **Python 3.8 or higher** installed on your system.
+Make sure the following are installed before starting:
 
--   A working **Webcam**.
+* **Node.js** v18.x or higher
+* **npm** or **yarn**
+* **Python** 3.10 or 3.11
+* A working **webcam** — RGB or compatible NIR/IR camera
+* **Git**
 
--   An internet connection (for downloading Python libraries and Tailwind/Icon CDNs).
+---
 
-### Step 1: Install Dependencies
+## 1. Backend Setup
 
-Open your terminal or command prompt in the `backend` folder and run:
+### Automated Setup — Recommended
 
-Bash
+#### Linux / macOS
 
-```
-pip install fastapi uvicorn numpy pandas opencv-python deepface tensorflow
-
-```
-
-*(Note: The first run might take a moment to download the DeepFace weights).*
-
-### Step 2: Start the Backend Server
-
-In the same terminal (inside the `backend` folder), run:
-
-Bash
-
-```
-python -m uvicorn main:app --reload
-
+```bash
+chmod +x setup.sh
+./setup.sh
 ```
 
-You should see a message saying: `Uvicorn running on http://127.0.0.1:8000`.
+#### Windows
 
-### Step 3: Launch the Application
-
-1.  Go to the `Frontend/frontpage` folder and double-click `index.html`.
-
-2.  Click **"Enter Experience"**.
-
-3.  **Log in:**
-
-    -   **Teacher:** User: `admin`, Pass: `admin`
-
-    -   **Student:** Use the Roll Number generated after registration (e.g., `REG-2025-001`) and default password `password123`.
-
-🏃‍♂️ How to Run the Demo (Hackathon Flow)
-==========================================
-
-1.  **Start the Server:** Ensure the black terminal window is running the FastAPI server.
-
-2.  **Open Teacher Portal:** Login as Admin.
-
-3.  **Register a User:**
-
-    -   Click "Add Student".
-
-    -   Enter your name (e.g., "Swaraj").
-
-    -   **Select a Class** from the dropdown (e.g., "Advanced Neural Networks").
-
-    -   Click "Capture & Save".
-
-4.  **Mark Attendance:**
-
-    -   Select the **SAME class** ("Advanced Neural Networks") from the dashboard dropdown.
-
-    -   Click "Mark Attendance".
-
-    -   Look at the camera -> See the **Green Verified Message**.
-
-5.  **Check Analytics:**
-
-    -   Logout and Login as the Student (`REG-2025-XXX`).
-
-    -   Show the **Attendance Graph** (it should show activity for today).
-
-    -   Scroll down to the **History Log** to see the exact timestamp.
-
-📁 Project Structure
-====================
-
-Plaintext
-
+```bat
+setup.bat
 ```
-EduFlow/
-├── backend/
-│   ├── main.py                # The Brain (FastAPI + AI Logic)
-│   ├── attendance.db          # Database (Auto-created)
-│   ├── known_faces/           # Folder storing registered student faces
-│   └── seed_history.py        # Script to generate fake past data for demos
+
+---
+
+### Manual Setup
+
+#### 1. Create and activate the virtual environment
+
+**Linux / macOS:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows:**
+
+```bat
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+#### 2. Upgrade core tooling and install dependencies
+
+```bash
+pip install --upgrade pip setuptools wheel
+pip install numpy==1.26.4
+pip install -r requirements.txt
+```
+
+#### 3. Apply database migrations
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Then run:
+
+```bash
+python manage.py makemigrations attendance
+python manage.py migrate
+```
+
+
+
+
+
+---
+
+## ▶️ Start the Django API Server
+
+From the `backend` directory:
+
+```bash
+python manage.py runserver
+```
+
+The REST API will be available at:
+
+```text
+http://127.0.0.1:8000/
+```
+
+---
+
+## 2. Frontend Setup — React + Vite
+
+Open a **new terminal window** and navigate to the frontend directory:
+
+```bash
+cd frontend
+```
+
+Install the Node.js dependencies:
+
+```bash
+npm install
+```
+
+Start the Vite development server:
+
+```bash
+npm run dev
+```
+
+The React client will be available at:
+
+```text
+http://localhost:5173/
+```
+
+> The exact port may differ if Vite automatically selects another available port.
+
+---
+
+# 🏃‍♂️ Hackathon Demo Workflow
+
+## 1. Faculty Login
+
+Access the faculty portal and log in using the demo teacher credentials:
+
+```text
+Username: admin
+Password: admin
+```
+
+---
+
+## 2. Student Onboarding
+
+1. Open the **Add Student** view.
+2. Enter the student's name.
+3. Select the target course, for example:
+
+   * Advanced Neural Networks
+4. Capture a clear face photo using the webcam component.
+5. Save the student's biometric information.
+
+---
+
+## 3. Attendance Verification
+
+1. Switch to the **Mark Attendance** tab.
+2. Select the corresponding course.
+3. Trigger the facial recognition scan.
+4. The backend:
+
+   * Captures the student's face.
+   * Extracts biometric features using DeepFace.
+   * Generates or retrieves the facial embedding.
+   * Validates the student against the selected course roster.
+   * Returns the attendance verification result.
+5. The verified student is marked as present.
+
+---
+
+## 4. Student Analytics
+
+Log out from the faculty portal and sign in using one of the generated student accounts.
+
+Example:
+
+```text
+Roll Number: REG-2025-001
+Password: password123
+```
+
+The student can then inspect:
+
+* 📊 7-day attendance trends
+* 📚 Course-wise attendance fulfillment
+* ⚠️ Attendance risk status
+* 🕒 Historical attendance logs
+* 📈 Attendance activity
+
+---
+
+# 📁 Project Structure
+
+```text
+EduFlow_changed/
 │
-└── Frontend/
-    ├── frontpage/             # The Landing Page
-    │   └── index.html
-    ├── Teacher Portal/        # Faculty Dashboard
-    │   ├── index.html
-    │   └── script.js
-    └── Student Portal/        # Student Dashboard
-        ├── index.html
-        └── script.js
-
+├── backend/
+│   ├── manage.py                  # Django CLI management entrypoint
+│   ├── db.sqlite3                 # Local SQLite database
+│   ├── known_faces/               # Enrolled biometric image store
+│   │
+│   ├── eduflow/
+│   │   ├── settings.py            # Django project configuration
+│   │   └── urls.py                # Project-level URL routing
+│   │
+│   └── attendance/
+│       ├── models.py              # Student, Log, and Course models
+│       ├── views.py               # REST API endpoints & dashboard telemetry
+│       ├── services.py            # DeepFace & OpenCV recognition pipeline
+│       └── urls.py                # App-level routing
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/            # Webcam scanner, charts, modals, navbars
+│   │   ├── pages/                 # Teacher Portal, Student Portal, Landing Page
+│   │   ├── services/              # Axios API clients & endpoints
+│   │   ├── App.jsx                # Root React component
+│   │   └── main.jsx               # React entry point
+│   │
+│   ├── package.json               # Frontend dependencies & scripts
+│   └── vite.config.js             # Vite configuration
+│
+├── requirements.txt               # Pinned Python dependencies
+├── setup.sh                       # One-click setup for Linux/macOS
+├── setup.bat                      # One-click setup for Windows
+└── .gitignore                     # Git ignore rules
 ```
 
-* * * * *
+---
 
-*Developed with ❤️ for the Hackathon.*
+# 🔐 Biometric Recognition Pipeline
+
+EduFlow follows a streamlined recognition workflow:
+
+```text
+Webcam
+   │
+   ▼
+Face Detection
+   │
+   ▼
+Image Preprocessing
+   │
+   ▼
+DeepFace / VGG-Face
+   │
+   ▼
+Face Embedding
+   │
+   ▼
+Embedding Cache
+   │
+   ▼
+Course Roster Validation
+   │
+   ▼
+Identity Verification
+   │
+   ▼
+Attendance Marked
+```
+
+This class-specific validation prevents a student from being incorrectly marked present in a course they are not enrolled in.
+
+---
+
+# 📊 Attendance Risk Classification
+
+EduFlow uses a mandatory **75% attendance threshold** to determine student attendance status.
+
+| Status          | Attendance Condition                              |
+| :-------------- | :------------------------------------------------ |
+| 🟢 **On Track** | Attendance is safely above the required threshold |
+| 🟡 **At Risk**  | Attendance is approaching the minimum requirement |
+| 🔴 **Critical** | Attendance is below the mandatory 75% requirement |
+
+---
+
+# ⚡ Performance Optimization
+
+EduFlow uses several optimizations to improve live classroom recognition:
+
+* Cached facial embeddings
+* Course-specific roster filtering
+* Local biometric vector storage
+* OpenCV-based image processing
+* TensorFlow-backed DeepFace inference
+* Reduced unnecessary database lookups
+* Real-time webcam processing
+
+---
+
+# 🧪 Development
+
+### Backend
+
+```bash
+cd backend
+python manage.py runserver
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+---
+
+# 🐛 Troubleshooting
+
+### Webcam Not Detected
+
+Make sure:
+
+* Your webcam is connected.
+* Browser camera permissions are enabled.
+* No other application is currently using the webcam.
+* The correct camera device is selected.
+
+### Backend Connection Error
+
+Verify that Django is running:
+
+```text
+http://127.0.0.1:8000/
+```
+
+Also check that the frontend API configuration points to the correct backend URL.
+
+### Dependency Installation Issues
+
+Ensure you are using a supported Python version:
+
+```bash
+python --version
+```
+
+Recommended:
+
+```text
+Python 3.10 or Python 3.11
+```
+
+Then recreate the virtual environment if necessary:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+```
+
+---
+
+# 🗺️ Future Improvements
+
+Potential future enhancements include:
+
+* ☁️ Cloud-based biometric storage
+* 🔐 JWT-based authentication
+* 📱 Mobile application
+* 📡 Multi-camera classroom support
+* 🧠 Improved anti-spoofing mechanisms
+* 📈 Advanced academic performance prediction
+* 🔔 Automated attendance notifications
+* 📊 Faculty-level analytics and reporting
+* 🏫 Multi-classroom and multi-campus deployment
+* 🗄️ PostgreSQL/MySQL production database support
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+## 👨‍💻 Built With
+
+**EduFlow** combines modern web development, artificial intelligence, and computer vision to create a smarter, faster, and more reliable attendance management experience.
+
+> **Automate attendance. Prevent proxies. Understand performance.**

@@ -1,0 +1,15 @@
+# Core Framework & API
+Django>=5.0,<6.0
+djangorestframework>=3.15.0
+django-cors-headers>=4.3.1
+
+# Computer Vision & Deep Learning
+numpy==1.26.4
+opencv-python==4.9.0.80
+deepface==0.0.93
+tensorflow==2.16.1
+tf-keras==2.16.0
+
+# Utilities & Validation
+pydantic>=2.7.0,<3.0.0
+uvicorn[standard]>=0.30.0

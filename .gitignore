@@ -1,0 +1,23 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache & build files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# SQLite Databases & Dynamic Media
+*.sqlite3
+*.db
+temp_scan.jpg
+known_faces/*.pkl
+
+# OS and Editor files
+.DS_Store
+.vscode/
