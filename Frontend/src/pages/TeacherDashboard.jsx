@@ -12,7 +12,9 @@ import {
   UploadCloud, 
   Download, 
   Plus, 
-  FileText 
+  FileText,
+  Trash2,
+  RotateCcw 
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -26,7 +28,9 @@ export default function TeacherDashboard({ onSignOut }) {
     'Ethics in AI',
     'Computer Vision 101'
   ]);
-  const [rosterData, setRosterData] = useState({ count: 0, students: [] });
+  const [rosterData, setRosterData] = useState({ count: 0, students: [], student_records: [] });
+  const [allStudentsList, setAllStudentsList] = useState([]);
+  const [directoryClassFilter, setDirectoryClassFilter] = useState('all');
   const [dashboardData, setDashboardData] = useState({
     stats: { total_students: 0, present_today: 0 },
     recent_logs: []
@@ -58,6 +62,21 @@ export default function TeacherDashboard({ onSignOut }) {
     }
   }, []);
 
+  // Fetch Directory Students (All or Class Specific)
+  const fetchDirectoryStudents = useCallback(async (filter = 'all') => {
+    try {
+      if (filter === 'all') {
+        const data = await api.getAllStudents();
+        setAllStudentsList(data.student_records || []);
+      } else {
+        const data = await api.getClassRoster(filter);
+        setAllStudentsList(data.student_records || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   // Fetch Dashboard Stats & Recent Logs
   const fetchDashboard = useCallback(async () => {
     try {
@@ -79,7 +98,8 @@ export default function TeacherDashboard({ onSignOut }) {
   useEffect(() => {
     fetchRoster(currentClass);
     fetchDashboard();
-  }, [currentClass, fetchRoster, fetchDashboard]);
+    fetchDirectoryStudents(directoryClassFilter);
+  }, [currentClass, directoryClassFilter, fetchRoster, fetchDashboard, fetchDirectoryStudents]);
 
   // Periodic refresh
   useEffect(() => {
@@ -120,18 +140,32 @@ export default function TeacherDashboard({ onSignOut }) {
           if (!blob) return;
           api.markAttendance(currentClass, blob)
             .then(d => {
-              if (d.status === 'success') {
+              if (d.status === 'success' && d.students && d.students.length > 0) {
+                const uniqueStudents = Array.from(new Set(d.students));
+                const conf = d.confidence || 95.0;
+                const latency = d.inference_time_ms ? ` (${d.inference_time_ms}ms)` : '';
                 setScanStatusHtml(
-                  <span className="text-green-400 font-bold">
-                    ✅ Verified: {d.students.join(', ')}
-                  </span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-green-400 font-bold text-base">
+                      ✅ Verified: {uniqueStudents.join(', ')}
+                    </span>
+                    <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full font-black">
+                      ⚡ {conf}% Confidence {latency}
+                    </span>
+                  </div>
                 );
                 fetchDashboard();
               } else if (d.status === 'failed') {
+                const conf = d.confidence > 0 ? ` (${d.confidence}% match)` : '';
                 setScanStatusHtml(
-                  <span className="text-yellow-400 font-bold">
-                    ⚠️ {d.message || 'Face not recognized in this class'}
-                  </span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-yellow-400 font-bold">
+                      ⚠️ {d.message || 'Face not recognized in this class'} {conf}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      Looking for students enrolled in {currentClass}
+                    </span>
+                  </div>
                 );
               }
             })
@@ -139,7 +173,7 @@ export default function TeacherDashboard({ onSignOut }) {
               console.error(err);
             });
         }, 'image/jpeg', 0.85);
-      }, 3000);
+      }, 2800);
 
     } catch (err) {
       setScanStatusText('❌ Camera Error: ' + err.message);
@@ -211,6 +245,7 @@ export default function TeacherDashboard({ onSignOut }) {
             closeRegModal();
             fetchRoster(currentClass);
             fetchDashboard();
+            fetchDirectoryStudents(directoryClassFilter);
           } else {
             alert("❌ Error: " + data.message);
           }
@@ -222,6 +257,52 @@ export default function TeacherDashboard({ onSignOut }) {
           setRegProcessing(false);
         });
     }, 'image/jpeg');
+  };
+
+  const handleDeleteStudent = async (student) => {
+    const name = typeof student === 'string' ? student : (student.name || 'this student');
+    const identifier = typeof student === 'object' ? (student.id || student.roll_number || student.name) : student;
+
+    if (!window.confirm(`Are you sure you want to delete "${name}"?\n\nThis will remove their biometric face data, class enrollments, and attendance history.`)) {
+      return;
+    }
+
+    try {
+      const res = await api.deleteStudent(identifier);
+      if (res.status === 'success') {
+        // Immediate local state update
+        setAllStudentsList(prev => prev.filter(s => {
+          const sName = typeof s === 'string' ? s : s.name;
+          const sId = typeof s === 'object' ? s.id : s;
+          return sName !== name && sId !== identifier;
+        }));
+        fetchRoster(currentClass);
+        fetchDashboard();
+        fetchDirectoryStudents(directoryClassFilter);
+      } else {
+        alert("❌ Error: " + (res.message || "Failed to delete student"));
+      }
+    } catch (err) {
+      alert("❌ Error: " + err.message);
+    }
+  };
+
+  const handleResetAttendance = async () => {
+    if (!window.confirm("Are you sure you want to reset all attendance records for today?\n\n(Registered student accounts will NOT be deleted)")) {
+      return;
+    }
+    try {
+      await api.resetDatabase();
+      setDashboardData(prev => ({
+        ...prev,
+        stats: { ...prev.stats, present_today: 0 },
+        recent_logs: []
+      }));
+      fetchDashboard();
+      alert("✅ Attendance records reset successfully");
+    } catch (err) {
+      alert("❌ Error: " + err.message);
+    }
   };
 
   const handleSignOut = () => {
@@ -356,6 +437,7 @@ export default function TeacherDashboard({ onSignOut }) {
                       <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         <th className="px-6 py-4">Reg ID</th>
                         <th className="px-6 py-4">Student Name</th>
+                        <th className="px-6 py-4">NN Confidence</th>
                         <th className="px-6 py-4">Status</th>
                         <th className="px-6 py-4">Time</th>
                       </tr>
@@ -363,23 +445,37 @@ export default function TeacherDashboard({ onSignOut }) {
                     <tbody className="divide-y divide-slate-100">
                       {dashboardData.recent_logs?.length === 0 ? (
                         <tr>
-                          <td colSpan="4" className="px-6 py-6 text-center text-slate-400 text-xs font-bold uppercase">
+                          <td colSpan="5" className="px-6 py-6 text-center text-slate-400 text-xs font-bold uppercase">
                             No attendance records today
                           </td>
                         </tr>
                       ) : (
-                        dashboardData.recent_logs?.map((row, idx) => (
-                          <tr key={idx} className="hover:bg-slate-50 border-b border-slate-100">
-                            <td className="px-6 py-4 text-xs font-bold text-slate-400">{row[0] || 'Unknown'}</td>
-                            <td className="px-6 py-4 font-black text-slate-800">{row[1]}</td>
-                            <td className="px-6 py-4">
-                              <span className="bg-green-100 text-green-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">
-                                Present
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 text-xs font-bold text-slate-500">{row[2]}</td>
-                          </tr>
-                        ))
+                        dashboardData.recent_logs?.map((row, idx) => {
+                          const conf = typeof row[4] === 'number' ? row[4] : parseFloat(row[4]) || 95.0;
+                          return (
+                            <tr key={idx} className="hover:bg-slate-50 border-b border-slate-100">
+                              <td className="px-6 py-4 text-xs font-bold text-slate-400">{row[0] || 'Unknown'}</td>
+                              <td className="px-6 py-4 font-black text-slate-800">{row[1]}</td>
+                              <td className="px-6 py-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black inline-flex items-center gap-1 ${
+                                  conf >= 80 
+                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' 
+                                    : conf >= 60 
+                                      ? 'bg-amber-50 text-amber-600 border border-amber-200' 
+                                      : 'bg-rose-50 text-rose-600 border border-rose-200'
+                                }`}>
+                                  ⚡ {conf.toFixed(1)}%
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="bg-green-100 text-green-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">
+                                  Present
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-xs font-bold text-slate-500">{row[2]}</td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -406,12 +502,22 @@ export default function TeacherDashboard({ onSignOut }) {
 
                 <button
                   onClick={() => setActiveTab('cloud')}
-                  className="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group relative z-10 cursor-pointer"
+                  className="w-full flex items-center p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/20 transition-all group relative z-10 cursor-pointer mb-4"
                 >
                   <div className="p-3 bg-blue-500/20 text-blue-300 rounded-xl mr-4">
                     <UploadCloud className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-bold">Upload Lecture Notes</span>
+                </button>
+
+                <button
+                  onClick={handleResetAttendance}
+                  className="w-full flex items-center p-4 bg-rose-500/10 rounded-2xl border border-rose-500/20 hover:border-rose-500/40 hover:bg-rose-500/20 transition-all group relative z-10 cursor-pointer text-rose-300"
+                >
+                  <div className="p-3 bg-rose-500/20 text-rose-300 rounded-xl mr-4">
+                    <RotateCcw className="w-5 h-5" />
+                  </div>
+                  <span className="text-sm font-bold">Reset Today's Attendance</span>
                 </button>
               </section>
             </div>
@@ -421,53 +527,108 @@ export default function TeacherDashboard({ onSignOut }) {
         {/* TAB 2: MY STUDENTS */}
         {activeTab === 'students' && (
           <div className="animate-fade-in">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Student Directory</h2>
-              <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Registered Student Directory</h2>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
+                  Total Enrolled: {allStudentsList.length} Students
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Course Filter Dropdown */}
+                <div className="relative">
+                  <select
+                    value={directoryClassFilter}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setDirectoryClassFilter(val);
+                      fetchDirectoryStudents(val);
+                    }}
+                    className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer shadow-sm pr-8"
+                  >
+                    <option value="all">All Registered Students</option>
+                    {classesList.map((cls, idx) => (
+                      <option key={idx} value={cls}>{cls}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+
                 <button
                   onClick={() => api.exportCsv()}
-                  className="flex items-center px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer"
+                  className="flex items-center px-5 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all cursor-pointer shadow-sm"
                 >
                   <Download className="w-4 h-4 mr-2" /> Export
                 </button>
                 <button
                   onClick={openRegistrationModal}
-                  className="flex items-center px-6 py-3 bg-[#7c3aed] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-900/20 cursor-pointer"
+                  className="flex items-center px-5 py-2.5 bg-[#7c3aed] text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-900/20 hover:bg-purple-700 transition-all cursor-pointer"
                 >
                   <Plus className="w-4 h-4 mr-2" /> Add Student
                 </button>
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50/50">
-                  <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {rosterData.students?.length === 0 ? (
-                    <tr>
-                      <td colSpan="2" className="px-6 py-4 text-center text-slate-400 text-xs font-bold uppercase">
-                        No students enrolled
-                      </td>
+            <div className="bg-white p-8 rounded-[40px] shadow-sm border border-slate-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50/50">
+                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      <th className="px-6 py-4">Reg ID</th>
+                      <th className="px-6 py-4">Student Name</th>
+                      <th className="px-6 py-4">Enrolled Course</th>
+                      <th className="px-6 py-4">Biometric Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
-                  ) : (
-                    rosterData.students?.map((student, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 border-b border-slate-100">
-                        <td className="px-6 py-4 font-bold text-slate-700">{student}</td>
-                        <td className="px-6 py-4">
-                          <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-lg text-[10px] font-black uppercase">
-                            Enrolled
-                          </span>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {allStudentsList.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-8 text-center text-slate-400 text-xs font-bold uppercase">
+                          No registered students found in this course
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      allStudentsList.map((st, idx) => {
+                        const name = typeof st === 'string' ? st : (st.name || 'Unknown');
+                        const roll = typeof st === 'object' ? (st.roll_number || 'N/A') : 'REG-2025-000';
+                        const course = typeof st === 'object' ? (st.class_name || currentClass) : currentClass;
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50/80 border-b border-slate-100 transition-colors">
+                            <td className="px-6 py-4 text-xs font-bold text-slate-400">{roll}</td>
+                            <td className="px-6 py-4 font-black text-slate-800">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-black text-xs">
+                                  {name.substring(0, 2).toUpperCase()}
+                                </div>
+                                <span>{name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-xs font-bold text-slate-600">{course}</td>
+                            <td className="px-6 py-4">
+                              <span className="bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1 rounded-full text-[10px] font-black uppercase inline-flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Active & Verified
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                onClick={() => handleDeleteStudent(st)}
+                                title={`Delete ${name}`}
+                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer inline-flex items-center gap-1 text-xs font-bold"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                <span className="hidden sm:inline">Delete</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}

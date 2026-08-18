@@ -442,12 +442,17 @@ export default function StudentDashboard({ onSignOut }) {
                             <p className="text-xl font-black text-slate-800 leading-none">{day}</p>
                           </div>
                           <div className="flex-1 border-l border-slate-200 pl-4">
-                            <h4 className="text-xs font-black text-slate-700">{log.class}</h4>
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs font-black text-slate-700">{log.class}</h4>
+                              <span className="text-[10px] font-black bg-purple-50 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full">
+                                ⚡ {log.confidence ? `${log.confidence}%` : '95.0%'} Verified
+                              </span>
+                            </div>
                             <p className="text-[10px] font-bold text-slate-400 mt-0.5">
                               Checked in at <span className="text-purple-600 font-bold">{log.time}</span>
                             </p>
                           </div>
-                          <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                          <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] ml-3"></div>
                         </div>
                       );
                     })

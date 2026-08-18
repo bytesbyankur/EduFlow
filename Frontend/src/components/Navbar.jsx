@@ -100,7 +100,7 @@ export default function Navbar({ onNavigateLanding }) {
             boxShadow: '0 0 8px #10b981',
             display: 'inline-block'
           }}></span>
-          TensorFlow & DeepFace Active
+          LightweightFaceNet NN Active
         </div>
       </div>
 

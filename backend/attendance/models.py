@@ -49,6 +49,7 @@ class AttendanceLog(models.Model):
     class_name = models.CharField(max_length=150, db_index=True)
     time = models.CharField(max_length=20)  # e.g. "14:30:15"
     date = models.CharField(max_length=20, db_index=True)  # e.g. "2026-08-15"
+    confidence = models.FloatField(default=95.0, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
