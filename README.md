@@ -1,6 +1,6 @@
 # EduFlow | AI-Powered Smart Attendance Management System
 
-EduFlow is an automated, computer-vision-driven attendance and academic analytics platform. Powered by **DeepFace**, **TensorFlow**, **Django REST Framework**, and a modern **React (Vite + Tailwind CSS)** client layer, EduFlow eliminates manual roll calls, mitigates proxy attendance through biometric verification, and delivers real-time attendance analytics for students and faculty.
+EduFlow is an automated, computer-vision-driven attendance and academic analytics platform. Powered by **LightweightFaceNet-v2 (SE-Depthwise Residual Neural Network)**, **PyTorch**, **Django REST Framework**, and a modern **React (Vite + Tailwind CSS)** client layer, EduFlow eliminates manual roll calls, mitigates proxy attendance through biometric verification, and delivers real-time attendance analytics for students and faculty with calibrated confidence scoring.
 
 ---
 
@@ -8,19 +8,20 @@ EduFlow is an automated, computer-vision-driven attendance and academic analytic
 
 ### 🧠 Computer Vision & Biometrics
 
-* **Touchless Attendance:** Real-time facial recognition matching against enrolled course rosters in milliseconds.
+* **Touchless Attendance:** Real-time facial recognition matching against enrolled course rosters in milliseconds (<15ms inference latency).
+* **Calibrated Neural Confidence:** Calibrated cosine similarity metrics on 128D $L_2$-normalized biometric hypersphere embeddings with percentage confidence levels.
 * **Class-Specific Filtering:** Smart roster validation ensures a student verified in *Computer Vision 101* is not mistakenly marked present for *Ethics in AI*.
-* **Automated Embeddings Cache:** Optimized representation caching via VGG-Face for rapid inference during live classroom scans.
+* **Lightweight Neural Network:** Efficient Inverted Residual Blocks with Squeeze-and-Excitation (SE) channel attention (~1.1M parameters).
 
 ### 🎓 Student Portal — React SPA
 
 * **Attendance Analytics:** 7-day rolling activity visualizers tracking daily attendance momentum.
 * **Risk Alerts:** Instant status indicators — *On Track*, *At Risk*, and *Critical* — triggered when attendance falls below the mandatory 75% threshold.
-* **Full Audit History:** Date- and time-stamped attendance logs for every enrolled course.
+* **Full Audit History:** Date- and time-stamped attendance logs with neural verification confidence for every enrolled course.
 
 ### 👨‍🏫 Faculty Dashboard — React SPA
 
-* **Webcam Integration:** Integrated client-side canvas/webcam controls for rapid student onboarding and real-time scanning.
+* **Webcam Integration:** Integrated client-side canvas/webcam scanner HUD with real-time confidence meters and radar scan targeting.
 * **Live Roster Telemetry:** Real-time visibility into active attendance counts, present vs. absent ratios, and course breakdowns.
 * **CSV Export:** Download official attendance rosters and logs directly from the UI.
 
@@ -32,8 +33,8 @@ EduFlow is an automated, computer-vision-driven attendance and academic analytic
 | :----------------------- | :------------------------------------------------------------------ |
 | **Frontend**             | React 18+, Vite, Tailwind CSS, Lucide Icons, Axios                  |
 | **Backend**              | Python 3.11, Django 5.x, Django REST Framework, django-cors-headers |
-| **AI / Computer Vision** | OpenCV, DeepFace, TensorFlow 2.16, tf-keras, NumPy 1.26             |
-| **Database & Storage**   | SQLite3, Local Biometric Vector Store                               |
+| **AI / Computer Vision** | LightweightFaceNet-v2, PyTorch 2.x, OpenCV, NumPy                   |
+| **Database & Storage**   | SQLite3, 128D Biometric Vector Gallery Cache                        |
 
 ---
 

@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================"
-echo "  Setting up EduFlow Environment...     "
+echo "  Setting up EduFlow Neural Environment "
 echo "========================================"
 
 # 1. Create Virtual Environment if it doesn't exist
@@ -20,7 +20,6 @@ source .venv/bin/activate
 # 3. Upgrade Pip & Install Dependencies
 echo "[3/4] Installing dependencies from requirements.txt..."
 pip install --upgrade pip setuptools wheel
-pip install numpy==1.26.4
 pip install -r requirements.txt
 
 # 4. Database Migrations

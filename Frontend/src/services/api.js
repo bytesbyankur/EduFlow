@@ -45,6 +45,22 @@ export const api = {
     return await request(`/get-class-roster?class_name=${encodeURIComponent(className)}`);
   },
 
+  async getAllStudents() {
+    return await request('/students');
+  },
+
+  async deleteStudent(studentIdOrName) {
+    return await request('/delete-student', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        student_id: studentIdOrName,
+        name: studentIdOrName,
+        id: studentIdOrName
+      }),
+    });
+  },
+
   async getCourses() {
     return await request('/courses');
   },
@@ -70,6 +86,21 @@ export const api = {
       method: 'POST',
       body: formData,
     });
+  },
+
+  async compareFaces(imageBlob1, imageBlob2) {
+    const formData = new FormData();
+    formData.append('image1', imageBlob1, 'img1.jpg');
+    formData.append('image2', imageBlob2, 'img2.jpg');
+
+    return await request('/compare-faces', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  async getModelInfo() {
+    return await request('/model-info');
   },
 
   async exportCsv() {
